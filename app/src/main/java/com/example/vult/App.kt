@@ -1,13 +1,12 @@
 package com.example.vult
 
+import android.animation.LayoutTransition
 import android.os.Bundle
 import android.view.*
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
+import android.widget.LinearLayout
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
 import com.example.vult.databinding.FragmentAppBinding
 
 // TODO: Rename parameter arguments, choose names that match
@@ -44,6 +43,17 @@ class App : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.appToolbar.inflateMenu(R.menu.app_menu)
+        binding.appToolbar.updatePadding(left = -48)
+        val searchView = binding.appToolbar.menu.findItem(R.id.filter).actionView as SearchView
+        searchView.maxWidth = Int.MAX_VALUE
+        val searchBar = searchView.findViewById(androidx.appcompat.R.id.search_bar) as LinearLayout
+        val transition = LayoutTransition().apply {
+            setDuration(200)
+            disableTransitionType(LayoutTransition.DISAPPEARING)
+            disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING)
+            disableTransitionType(LayoutTransition.APPEARING)
+        }
+        searchBar.layoutTransition = transition
         binding.appToolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.sync -> {
