@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_nav_graph"
+    app:startDestination="@id/vault">
+    <fragment
+        android:id="@+id/credential"
+        android:name="com.example.vult.fragments.credential.Credential"
+        android:label="fragment_credential"
+        tools:layout="@layout/fragment_credential" />
+    <fragment
+        android:id="@+id/vault"
+        android:name="com.example.vult.fragments.vault.Vault"
+        android:label="fragment_vault"
+        tools:layout="@layout/fragment_vault" >
+        <action
+            android:id="@+id/action_vault_to_credential"
+            app:destination="@id/credential" />
+    </fragment>
+</navigation>

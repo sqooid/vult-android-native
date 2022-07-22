@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/createAccount">
+
+    <fragment
+        android:id="@+id/createAccount"
+        android:name="com.example.vult.fragments.createaccount.CreateAccount"
+        android:label="fragment_create_account"
+        tools:layout="@layout/fragment_create_account" >
+        <action
+            android:id="@+id/action_createAccount_to_app"
+            app:destination="@id/app" />
+        <action
+            android:id="@+id/action_createAccount_to_importAccount"
+            app:destination="@id/importAccount" />
+    </fragment>
+    <fragment
+        android:id="@+id/login"
+        android:name="com.example.vult.fragments.login.Login"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_login_to_app"
+            app:destination="@id/app" />
+    </fragment>
+    <fragment
+        android:id="@+id/app"
+        android:name="com.example.vult.App"
+        android:label="fragment_app"
+        tools:layout="@layout/fragment_app" />
+    <fragment
+        android:id="@+id/importAccount"
+        android:name="com.example.vult.fragments.importaccount.ImportAccount"
+        android:label="fragment_import_account"
+        tools:layout="@layout/fragment_import_account" >
+        <action
+            android:id="@+id/action_importAccount_to_app"
+            app:destination="@id/app" />
+    </fragment>
+</navigation>
