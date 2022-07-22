@@ -1,4 +1,4 @@
-package com.example.vult.fragments.importaccount
+package com.sqooid.vult.fragments.importaccount
 
 import androidx.lifecycle.ViewModel
 

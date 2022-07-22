@@ -1,4 +1,4 @@
-package com.example.vult
+package com.sqooid.vult
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat

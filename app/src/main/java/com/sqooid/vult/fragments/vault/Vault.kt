@@ -1,4 +1,4 @@
-package com.example.vult.fragments.vault
+package com.sqooid.vult.fragments.vault
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.vult.R
+import com.sqooid.vult.R
 
 class Vault : Fragment() {
 

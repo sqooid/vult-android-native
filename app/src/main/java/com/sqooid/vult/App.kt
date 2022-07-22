@@ -1,4 +1,4 @@
-package com.example.vult
+package com.sqooid.vult
 
 import android.animation.LayoutTransition
 import android.os.Bundle
@@ -7,7 +7,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import com.example.vult.databinding.FragmentAppBinding
+import com.sqooid.vult.databinding.FragmentAppBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,7 +34,7 @@ class App : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentAppBinding.inflate(inflater, container, false)
         return binding.root

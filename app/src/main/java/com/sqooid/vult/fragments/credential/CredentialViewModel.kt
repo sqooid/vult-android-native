@@ -1,4 +1,4 @@
-package com.example.vult.fragments.credential
+package com.sqooid.vult.fragments.credential
 
 import androidx.lifecycle.ViewModel
 

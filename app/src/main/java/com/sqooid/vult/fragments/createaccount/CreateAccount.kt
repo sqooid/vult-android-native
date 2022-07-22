@@ -1,4 +1,4 @@
-package com.example.vult.fragments.createaccount
+package com.sqooid.vult.fragments.createaccount
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -6,9 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
-import com.example.vult.R
-import com.example.vult.databinding.FragmentCreateAccountBinding
+import com.sqooid.vult.databinding.FragmentCreateAccountBinding
 
 class CreateAccount : Fragment() {
 
@@ -24,7 +22,7 @@ class CreateAccount : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentCreateAccountBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,10 +31,6 @@ class CreateAccount : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this).get(CreateAccountViewModel::class.java)
         // TODO: Use the ViewModel
-        binding.button.setOnClickListener(View.OnClickListener { _ ->
-            this.findNavController()
-                .navigate(CreateAccountDirections.actionCreateAccountToApp())
-        })
     }
 
 }

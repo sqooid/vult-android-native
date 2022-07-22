@@ -19,4 +19,10 @@
     <string name="sync">Sync</string>
     <string name="settings">Settings</string>
     <string name="filter">Filter</string>
+    <string name="create">Create</string>
+    <string name="import_page_prompt">Import</string>
+    <string name="master_password">Master password</string>
+    <string name="creation_prompt">Create a master password to keep the rest of your passwords safe. Make sure you record it somewhere as if you lose it you will lose all data stored here</string>
+    <string name="import_option_prompt">or\n\nImport from an existing Vult server</string>
+    <string name="vult_logo">Vult logo</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.vult.fragments.credential
+package com.sqooid.vult.fragments.importaccount
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -6,26 +6,26 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.vult.R
+import com.sqooid.vult.R
 
-class Credential : Fragment() {
+class ImportAccount : Fragment() {
 
     companion object {
-        fun newInstance() = Credential()
+        fun newInstance() = ImportAccount()
     }
 
-    private lateinit var viewModel: CredentialViewModel
+    private lateinit var viewModel: ImportAccountViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_credential, container, false)
+        return inflater.inflate(R.layout.fragment_import_account, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(CredentialViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(ImportAccountViewModel::class.java)
         // TODO: Use the ViewModel
     }
 
