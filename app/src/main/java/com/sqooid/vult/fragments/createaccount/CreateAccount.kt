@@ -1,5 +1,6 @@
 package com.sqooid.vult.fragments.createaccount
 
+import android.animation.LayoutTransition
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -35,8 +36,14 @@ class CreateAccount : Fragment() {
         viewModel = ViewModelProvider(this).get(CreateAccountViewModel::class.java)
         binding.viewmodel = viewModel
 
+        binding.createAccountLayout.layoutTransition =
+            LayoutTransition().apply { enableTransitionType(LayoutTransition.CHANGING) }
+
+//        binding.
+
         binding.buttonImportPage.setOnClickListener {
-            it.findNavController().navigate(CreateAccountDirections.actionCreateAccountToImportAccount())
+            it.findNavController()
+                .navigate(CreateAccountDirections.actionCreateAccountToImportAccount())
         }
 
         binding.buttonCreateAccount.setOnClickListener {
@@ -44,7 +51,7 @@ class CreateAccount : Fragment() {
         }
 
         viewModel.passwordTooShort.observe(viewLifecycleOwner, Observer<PasswordValidator.PasswordWeakness> {weakness->
-            binding.editTextMasterPassword.error = when (weakness) {
+            binding.editTextMasterPasswordWrapper.error = when (weakness) {
                 null -> null
                 PasswordValidator.PasswordWeakness.None -> null
                 PasswordValidator.PasswordWeakness.TooShort -> "Password must be at least 8 characters long"

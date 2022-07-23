@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="viewmodel"
             type="com.sqooid.vult.fragments.createaccount.CreateAccountViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/create_account_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="20dp"
@@ -22,32 +25,41 @@
             android:maxWidth="@dimen/text_max_width"
             android:text="@string/creation_prompt"
             android:textAlignment="center"
-            app:layout_constraintBottom_toTopOf="@+id/edit_text_master_password"
+            app:layout_constraintBottom_toTopOf="@+id/edit_text_master_password_wrapper"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
-        <EditText
-            android:id="@+id/edit_text_master_password"
-            android:layout_width="wrap_content"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/edit_text_master_password_wrapper"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:ems="10"
-            android:hint="@string/master_password"
-            android:importantForAutofill="no"
-            android:inputType="textPersonName"
-            android:textAlignment="center"
-            android:text="@={viewmodel.masterPassword}"
-            app:layout_constraintBottom_toTopOf="@+id/buttonCreateAccount"
+            app:errorIconDrawable="@null"
+            app:hintEnabled="false"
+            app:boxBackgroundColor="@color/transparent"
+            app:layout_constraintBottom_toTopOf="@+id/button_create_account"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
-            tools:ignore="TextFields" />
+            app:layout_constraintTop_toBottomOf="@+id/textView">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_master_password"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/master_password"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:text="@={viewmodel.masterPassword}"
+                android:textAlignment="center"
+                tools:ignore="TextFields" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/buttonCreateAccount"
+            android:id="@+id/button_create_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
@@ -56,7 +68,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/edit_text_master_password" />
+            app:layout_constraintTop_toBottomOf="@+id/edit_text_master_password_wrapper" />
 
         <Button
             android:id="@+id/button_import_page"
@@ -81,7 +93,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonCreateAccount" />
+            app:layout_constraintTop_toBottomOf="@+id/button_create_account" />
 
         <ImageView
             android:id="@+id/imageView2"
