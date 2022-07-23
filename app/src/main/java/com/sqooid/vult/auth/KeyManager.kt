@@ -1,8 +1,6 @@
 package com.sqooid.vult.auth
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProtection
 import android.util.Base64
@@ -11,8 +9,6 @@ import com.sqooid.vult.Vals
 import java.nio.charset.Charset
 import java.security.KeyStore
 import java.security.SecureRandom
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -44,8 +40,10 @@ class KeyManager {
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build()
             )
             val saltString = Base64.encode(salt, Base64.NO_PADDING or Base64.NO_WRAP).toString(
-                Charset.defaultCharset())
-            context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().putString(Vals.KEY_SALT_KEY, saltString).apply()
+                Charset.defaultCharset()
+            )
+            context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit()
+                .putString(Vals.KEY_SALT_KEY, saltString).apply()
         }
 
         fun getMasterKey(): SecretKey? {

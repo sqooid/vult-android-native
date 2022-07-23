@@ -1,9 +1,7 @@
 package com.sqooid.vult.auth
 
 import android.util.Base64
-import android.util.Log
 import java.nio.charset.Charset
-import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
@@ -20,6 +18,7 @@ class Crypto {
             val cipherText = String(Base64.encode(cipherBytes, Base64.NO_PADDING or Base64.NO_WRAP))
             return "$ivText:$cipherText"
         }
+
         fun decrypt(key: SecretKey, text: String): String {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             val split = text.split(":")

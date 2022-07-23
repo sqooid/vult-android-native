@@ -2,7 +2,9 @@ package com.sqooid.vult
 
 import android.animation.LayoutTransition
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.updatePadding

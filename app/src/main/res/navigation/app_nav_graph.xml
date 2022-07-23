@@ -13,7 +13,7 @@
         android:id="@+id/vault"
         android:name="com.sqooid.vult.fragments.vault.Vault"
         android:label="fragment_vault"
-        tools:layout="@layout/fragment_vault" >
+        tools:layout="@layout/fragment_vault">
         <action
             android:id="@+id/action_vault_to_credential"
             app:destination="@id/credential" />

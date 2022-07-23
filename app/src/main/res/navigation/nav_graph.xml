@@ -9,7 +9,7 @@
         android:id="@+id/createAccount"
         android:name="com.sqooid.vult.fragments.createaccount.CreateAccount"
         android:label="fragment_create_account"
-        tools:layout="@layout/fragment_create_account" >
+        tools:layout="@layout/fragment_create_account">
         <action
             android:id="@+id/action_createAccount_to_app"
             app:destination="@id/app"
@@ -28,7 +28,7 @@
         android:id="@+id/login"
         android:name="com.sqooid.vult.fragments.login.Login"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" >
+        tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_login_to_app"
             app:destination="@id/app" />
@@ -42,7 +42,7 @@
         android:id="@+id/importAccount"
         android:name="com.sqooid.vult.fragments.importaccount.ImportAccount"
         android:label="fragment_import_account"
-        tools:layout="@layout/fragment_import_account" >
+        tools:layout="@layout/fragment_import_account">
         <action
             android:id="@+id/action_importAccount_to_app"
             app:destination="@id/app" />
