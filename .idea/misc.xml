@@ -7,10 +7,11 @@
         <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.342" />
         <entry key="app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.342" />
         <entry key="app/src/main/res/drawable/ic_baseline_sync_24.xml" value="0.342" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.3025" />
         <entry key="app/src/main/res/drawable/ic_vult_logo_new.xml" value="0.49" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.5317708333333333" />
         <entry key="app/src/main/res/layout/fragment_app.xml" value="0.45" />
-        <entry key="app/src/main/res/layout/fragment_create_account.xml" value="0.5317708333333333" />
+        <entry key="app/src/main/res/layout/fragment_create_account.xml" value="0.4170444242973708" />
         <entry key="app/src/main/res/layout/fragment_import.xml" value="0.2989583333333333" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.2989583333333333" />
         <entry key="app/src/main/res/layout/fragment_vault.xml" value="0.5317708333333333" />
