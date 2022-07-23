@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.sqooid.vult.auth.PasswordValidator
 import com.sqooid.vult.databinding.FragmentCreateAccountBinding
 
@@ -39,8 +40,6 @@ class CreateAccount : Fragment() {
         binding.createAccountLayout.layoutTransition =
             LayoutTransition().apply { enableTransitionType(LayoutTransition.CHANGING) }
 
-//        binding.
-
         binding.buttonImportPage.setOnClickListener {
             it.findNavController()
                 .navigate(CreateAccountDirections.actionCreateAccountToImportAccount())
@@ -50,14 +49,24 @@ class CreateAccount : Fragment() {
             viewModel.createAccount(requireContext())
         }
 
-        viewModel.passwordTooShort.observe(viewLifecycleOwner, Observer<PasswordValidator.PasswordWeakness> {weakness->
-            binding.editTextMasterPasswordWrapper.error = when (weakness) {
+        viewModel.passwordTooShort.observe(viewLifecycleOwner) {
+            binding.editTextMasterPasswordWrapper.error = when (it) {
                 null -> null
-                PasswordValidator.PasswordWeakness.None -> null
+                PasswordValidator.PasswordWeakness.None -> {
+                    viewModel.promptBiometrics(this)
+                    null
+                }
                 PasswordValidator.PasswordWeakness.TooShort -> "Password must be at least 8 characters long"
                 PasswordValidator.PasswordWeakness.NotEnoughVariety -> "Password must contain at least one lowercase and uppercase letter, number and symbol"
             }
-        })
+        }
+
+        viewModel.successfullyCreated.observe(viewLifecycleOwner) {
+            if (it == true) {
+                this.findNavController()
+                    .navigate(CreateAccountDirections.actionCreateAccountToApp())
+            }
+        }
     }
 
 }

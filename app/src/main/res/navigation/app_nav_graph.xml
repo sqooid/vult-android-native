@@ -17,5 +17,12 @@
         <action
             android:id="@+id/action_vault_to_credential"
             app:destination="@id/credential" />
+        <action
+            android:id="@+id/action_vault_to_settings2"
+            app:destination="@id/settings" />
     </fragment>
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.sqooid.vult.Settings"
+        android:label="Settings" />
 </navigation>
