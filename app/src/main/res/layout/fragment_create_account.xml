@@ -38,6 +38,7 @@
             android:importantForAutofill="no"
             android:inputType="textPersonName"
             android:textAlignment="center"
+            android:text="@={viewmodel.masterPassword}"
             app:layout_constraintBottom_toTopOf="@+id/buttonCreateAccount"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

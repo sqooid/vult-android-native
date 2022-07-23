@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.findNavController
 import com.sqooid.vult.databinding.FragmentCreateAccountBinding
 
 class CreateAccount : Fragment() {
@@ -30,7 +31,15 @@ class CreateAccount : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this).get(CreateAccountViewModel::class.java)
-        // TODO: Use the ViewModel
+        binding.viewmodel = viewModel
+
+        binding.buttonImportPage.setOnClickListener {
+            it.findNavController().navigate(CreateAccountDirections.actionCreateAccountToImportAccount())
+        }
+
+        binding.buttonCreateAccount.setOnClickListener {
+            viewModel.createAccount(requireContext())
+        }
     }
 
 }
