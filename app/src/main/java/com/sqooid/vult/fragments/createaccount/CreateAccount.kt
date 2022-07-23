@@ -6,7 +6,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
+import com.sqooid.vult.auth.PasswordValidator
 import com.sqooid.vult.databinding.FragmentCreateAccountBinding
 
 class CreateAccount : Fragment() {
@@ -40,6 +42,15 @@ class CreateAccount : Fragment() {
         binding.buttonCreateAccount.setOnClickListener {
             viewModel.createAccount(requireContext())
         }
+
+        viewModel.passwordTooShort.observe(viewLifecycleOwner, Observer<PasswordValidator.PasswordWeakness> {weakness->
+            binding.editTextMasterPassword.error = when (weakness) {
+                null -> null
+                PasswordValidator.PasswordWeakness.None -> null
+                PasswordValidator.PasswordWeakness.TooShort -> "Password must be at least 8 characters long"
+                PasswordValidator.PasswordWeakness.NotEnoughVariety -> "Password must contain at least one lowercase and uppercase letter, number and symbol"
+            }
+        })
     }
 
 }

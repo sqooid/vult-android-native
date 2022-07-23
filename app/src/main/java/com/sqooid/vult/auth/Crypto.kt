@@ -10,14 +10,7 @@ import javax.crypto.spec.GCMParameterSpec
 
 class Crypto {
     companion object {
-        private val AAD = ByteArray(12)
-
         fun encrypt(key: SecretKey, message: String): String {
-
-            val salt = byteArrayOf(32)
-            val random = SecureRandom()
-            random.nextBytes(salt)
-
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.ENCRYPT_MODE, key)
             val cipherBytes = cipher.doFinal(message.toByteArray())

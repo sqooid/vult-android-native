@@ -45,7 +45,6 @@ class KeyManager {
             )
             val saltString = Base64.encode(salt, Base64.NO_PADDING or Base64.NO_WRAP).toString(
                 Charset.defaultCharset())
-            Log.d("auth", saltString)
             context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().putString(Vals.KEY_SALT_KEY, saltString).apply()
         }
 
