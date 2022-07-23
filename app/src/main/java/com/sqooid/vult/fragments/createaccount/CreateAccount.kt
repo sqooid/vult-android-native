@@ -1,8 +1,11 @@
 package com.sqooid.vult.fragments.createaccount
 
 import android.animation.LayoutTransition
+import android.app.AlertDialog
+import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +13,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
+import com.sqooid.vult.R
 import com.sqooid.vult.auth.PasswordValidator
 import com.sqooid.vult.databinding.FragmentCreateAccountBinding
 
@@ -53,20 +58,27 @@ class CreateAccount : Fragment() {
             binding.editTextMasterPasswordWrapper.error = when (it) {
                 null -> null
                 PasswordValidator.PasswordWeakness.None -> {
-                    viewModel.promptBiometrics(this)
+                    promptBiometrics()
                     null
                 }
                 PasswordValidator.PasswordWeakness.TooShort -> "Password must be at least 8 characters long"
                 PasswordValidator.PasswordWeakness.NotEnoughVariety -> "Password must contain at least one lowercase and uppercase letter, number and symbol"
             }
         }
+    }
 
-        viewModel.successfullyCreated.observe(viewLifecycleOwner) {
-            if (it == true) {
+    fun promptBiometrics() {
+        val builder = AlertDialog.Builder(requireActivity())
+        builder.setTitle(R.string.biometrics_title).setMessage(R.string.enable_biometrics_dialog)
+            .setPositiveButton("Enable") { _, _ ->
+                PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
+                    .putBoolean(this.getString(R.string.bio_key), true)
+            }
+            .setNegativeButton("Later", null)
+            .setOnDismissListener {
                 this.findNavController()
                     .navigate(CreateAccountDirections.actionCreateAccountToApp())
             }
-        }
+            .show()
     }
-
 }
