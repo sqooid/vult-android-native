@@ -1,34 +1,39 @@
 package com.sqooid.vult.auth
 
+import android.util.Base64
+import android.util.Log
+import java.nio.charset.Charset
 import java.security.SecureRandom
-import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class Crypto {
-    fun encrypt(key: SecretKey, message: String): String {
+    companion object {
+        private val AAD = ByteArray(12)
 
-        val salt = byteArrayOf(32)
-        val random = SecureRandom()
-        random.nextBytes(salt)
+        fun encrypt(key: SecretKey, message: String): String {
 
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        val cipherText = cipher.doFinal(message.toByteArray())
-        val iv = cipher.iv
+            val salt = byteArrayOf(32)
+            val random = SecureRandom()
+            random.nextBytes(salt)
 
-        val result = String(Base64.getEncoder().encode(iv))
-        result.plus(":")
-        result.plus(Base64.getEncoder().encode(cipherText))
-        return result
-    }
-    fun decrypt(key: SecretKey, text: String): String {
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val split = text.split(":")
-        val iv = Base64.getDecoder().decode(split[0])
-        val cipherText = Base64.getDecoder().decode(split[1])
-        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(96, iv))
-        return String(cipher.doFinal(cipherText))
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.ENCRYPT_MODE, key)
+            val cipherBytes = cipher.doFinal(message.toByteArray())
+            val iv = cipher.iv
+
+            val ivText = String(Base64.encode(iv, Base64.NO_PADDING or Base64.NO_WRAP))
+            val cipherText = String(Base64.encode(cipherBytes, Base64.NO_PADDING or Base64.NO_WRAP))
+            return "$ivText:$cipherText"
+        }
+        fun decrypt(key: SecretKey, text: String): String {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            val split = text.split(":")
+            val iv = Base64.decode(split[0], Base64.NO_PADDING or Base64.NO_WRAP)
+            val cipherText = Base64.decode(split[1], Base64.NO_PADDING or Base64.NO_WRAP)
+            cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
+            return cipher.doFinal(cipherText).toString(Charset.defaultCharset())
+        }
     }
 }
