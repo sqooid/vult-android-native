@@ -105,7 +105,7 @@ class KeyManager {
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .setKeySize(256)
                 .build()
-            return MasterKey.Builder(context).setKeyGenParameterSpec(spec).build()
+            return MasterKey.Builder(context, LOCAL_KEY_ALIAS).setKeyGenParameterSpec(spec).build()
         }
 
         /**

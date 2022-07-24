@@ -7,6 +7,9 @@ buildscript {
     dependencies {
         def nav_version = "2.5.0"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:1.7.10"
     }
 }
 plugins {
@@ -15,7 +18,4 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
 

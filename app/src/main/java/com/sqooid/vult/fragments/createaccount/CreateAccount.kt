@@ -58,6 +58,7 @@ class CreateAccount : Fragment() {
                 null -> null
                 PasswordValidator.PasswordWeakness.None -> {
                     promptBiometrics()
+                    viewModel.createDataKey()
                     null
                 }
                 PasswordValidator.PasswordWeakness.TooShort -> "Password must be at least 8 characters long"

@@ -2,12 +2,13 @@ package com.sqooid.vult.fragments.vault
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.DatabaseManager
+import kotlinx.coroutines.launch
 
 class VaultViewModel(application: Application) : AndroidViewModel(application) {
-    val credentialList: MutableLiveData<List<Credential>> = MutableLiveData(DatabaseManager.storeDao(getApplication() as Context).getAll())
+    val credentialList: LiveData<List<Credential>> = DatabaseManager.storeDao(getApplication() as Context).getAll()
+
+
 }
