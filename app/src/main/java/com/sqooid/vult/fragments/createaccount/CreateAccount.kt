@@ -69,7 +69,7 @@ class CreateAccount : Fragment() {
         builder.setTitle(R.string.biometrics_title).setMessage(R.string.enable_biometrics_dialog)
             .setPositiveButton("Enable") { _, _ ->
                 PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
-                    .putBoolean(this.getString(R.string.bio_key), true)
+                    .putBoolean(this.getString(R.string.bio_key), true).apply()
             }
             .setNegativeButton("Later", null)
             .setOnDismissListener {

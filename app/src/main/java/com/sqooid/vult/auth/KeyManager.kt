@@ -6,9 +6,11 @@ import android.security.keystore.KeyProtection
 import android.util.Base64
 import android.util.Log
 import com.sqooid.vult.Vals
+import org.mindrot.jbcrypt.BCrypt
 import java.nio.charset.Charset
 import java.security.KeyStore
 import java.security.SecureRandom
+import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -42,8 +44,17 @@ class KeyManager {
             val saltString = Base64.encode(salt, Base64.NO_PADDING or Base64.NO_WRAP).toString(
                 Charset.defaultCharset()
             )
-            context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit()
-                .putString(Vals.KEY_SALT_KEY, saltString).apply()
+
+            // Do bcrypt hash
+            val hash = BCrypt.hashpw(seed, BCrypt.gensalt())
+
+            context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().apply {
+                putString(Vals.KEY_SALT_KEY, saltString)
+                putString(Vals.HASH, hash)
+                apply()
+            }
+
+
         }
 
         fun getMasterKey(): SecretKey? {
