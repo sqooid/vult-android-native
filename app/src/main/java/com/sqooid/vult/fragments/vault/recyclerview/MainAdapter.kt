@@ -5,9 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.constraintlayout.helper.widget.Carousel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.sqooid.vult.R
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.databinding.CredentialTileBinding
 import com.sqooid.vult.databinding.FieldBinding
@@ -22,10 +24,14 @@ class MainAdapter(var data: List<Credential>): RecyclerView.Adapter<MainAdapter.
         val binding = CredentialTileBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
         val layout = binding.linearLayout
-        layout.layoutTransition = LayoutTransition()
+        layout.layoutTransition = LayoutTransition().apply {
+            enableTransitionType(LayoutTransition.CHANGING)
+        }
         binding.tagContainer.layoutManager = LinearLayoutManager(parent.context, LinearLayoutManager.HORIZONTAL, false)
         binding.tagContainer.adapter = TagAdapter(listOf())
+        binding.fieldContainer.layoutManager = LinearLayoutManager(parent.context)
         binding.fieldContainer.adapter = FieldAdapter(listOf())
+        binding.card.animation = AnimationUtils.loadAnimation(parent.context, R.anim.fade_in)
         return ViewHolder(binding)
     }
 
@@ -48,13 +54,13 @@ class MainAdapter(var data: List<Credential>): RecyclerView.Adapter<MainAdapter.
             binding.fieldContainer.visibility = View.VISIBLE
             (binding.fieldContainer.adapter as FieldAdapter).fields = credential.getVisibleFields()
             Log.d("app", "bound ${credential.getVisibleFields()}")
-            (binding.fieldContainer.adapter as FieldAdapter).notifyDataSetChanged()
+            binding.fieldContainer.adapter!!.notifyDataSetChanged()
             // Expand when clicked
             binding.root.setOnClickListener {
                 Log.d("app","clicked tile $position")
                 credential.expanded = !credential.expanded
                 (binding.fieldContainer.adapter as FieldAdapter).fields = credential.getVisibleFields()
-                (binding.fieldContainer.adapter as FieldAdapter).notifyDataSetChanged()
+                binding.fieldContainer.adapter!!.notifyDataSetChanged()
                 this.notifyItemChanged(position)
                 this.notifyDataSetChanged()
             }

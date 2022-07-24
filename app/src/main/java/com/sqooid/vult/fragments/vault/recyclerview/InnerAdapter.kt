@@ -9,25 +9,22 @@ import com.sqooid.vult.database.CredentialField
 import com.sqooid.vult.databinding.FieldBinding
 import com.sqooid.vult.databinding.TagBinding
 
-class FieldAdapter(var fields: List<CredentialField>) : BaseAdapter() {
-    override fun getCount(): Int {
+class FieldAdapter(var fields: List<CredentialField>) : RecyclerView.Adapter<FieldAdapter.FieldViewHolder>() {
+    class FieldViewHolder(val binding: FieldBinding) : RecyclerView.ViewHolder(binding.root) {}
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = FieldBinding.inflate(inflater, parent, false)
+        return FieldViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: FieldViewHolder, position: Int) {
+        holder.binding.textFieldName.text = fields[position].name
+        holder.binding.textValue.text = fields[position].value
+    }
+
+    override fun getItemCount(): Int {
         return fields.size
-    }
-
-    override fun getItem(p0: Int): Any {
-        return fields[p0]
-    }
-
-    override fun getItemId(p0: Int): Long {
-        return 0
-    }
-
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        val inflater = LayoutInflater.from(p2?.context)
-        val binding = FieldBinding.inflate(inflater, p2, false)
-        binding.textFieldName.text = fields[p0].name
-        binding.textValue.text = fields[p0].value
-        return binding.root
     }
 }
 

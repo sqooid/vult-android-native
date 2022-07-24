@@ -15,7 +15,6 @@ data class Credential(
 ) {
     var expanded = false
     fun getVisibleFields(): List<CredentialField> {
-        return fields
         if (expanded || fields.isEmpty()) {
             return fields
         }
