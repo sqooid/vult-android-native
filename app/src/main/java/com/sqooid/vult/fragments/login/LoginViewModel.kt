@@ -9,9 +9,9 @@ import org.mindrot.jbcrypt.BCrypt
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var password = ""
+    val hash = (getApplication() as Context).getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).getString(Vals.HASH, "")
 
     fun passwordLogin(): Boolean {
-        val hash = (getApplication() as Context).getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).getString(Vals.HASH, "") //todo add check
         return BCrypt.checkpw(password, hash)
     }
 }

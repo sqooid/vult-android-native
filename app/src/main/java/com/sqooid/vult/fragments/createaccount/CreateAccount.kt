@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -64,18 +66,22 @@ class CreateAccount : Fragment() {
         }
     }
 
-    fun promptBiometrics() {
-        val builder = AlertDialog.Builder(requireActivity())
-        builder.setTitle(R.string.biometrics_title).setMessage(R.string.enable_biometrics_dialog)
-            .setPositiveButton("Enable") { _, _ ->
-                PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
-                    .putBoolean(this.getString(R.string.bio_key), true).apply()
-            }
-            .setNegativeButton("Later", null)
-            .setOnDismissListener {
-                this.findNavController()
-                    .navigate(CreateAccountDirections.actionCreateAccountToApp())
-            }
-            .show()
+    private fun promptBiometrics() {
+        val biometricManager = BiometricManager.from(requireContext())
+        if (biometricManager.canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+            val builder = AlertDialog.Builder(requireActivity())
+            builder.setTitle(R.string.biometrics_title)
+                .setMessage(R.string.enable_biometrics_dialog)
+                .setPositiveButton("Enable") { _, _ ->
+                    PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
+                        .putBoolean(this.getString(R.string.bio_key), true).apply()
+                }
+                .setNegativeButton("Later", null)
+                .setOnDismissListener {
+                    this.findNavController()
+                        .navigate(CreateAccountDirections.actionCreateAccountToApp())
+                }
+                .show()
+        }
     }
 }
