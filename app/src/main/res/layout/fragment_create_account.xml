@@ -49,7 +49,7 @@
                 android:id="@+id/edit_text_master_password"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="@string/master_password"
+                android:hint="@string/new_master_password"
                 android:importantForAutofill="no"
                 android:inputType="textPersonName"
                 android:text="@={viewmodel.masterPassword}"

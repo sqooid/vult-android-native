@@ -21,11 +21,15 @@
     <string name="filter">Filter</string>
     <string name="create">Create</string>
     <string name="import_page_prompt">Import</string>
-    <string name="master_password">New master password</string>
+    <string name="new_master_password">New master password</string>
     <string name="creation_prompt">Create a master password to keep the rest of your passwords safe. Make sure you record it somewhere - if you lose it you will lose all your data</string>
     <string name="import_option_prompt">or</string>
     <string name="vult_logo">Vult logo</string>
     <string name="creation_import_exp">from an existing Vult server</string>
     <string name="enable_biometrics_dialog">Do you want to enable biometrics for faster login?</string>
     <string name="bio_key">bio</string>
+    <string name="use_biometrics">Use biometrics</string>
+    <string name="log_in">Log in</string>
+    <string name="master_password">Master password</string>
+    <string name="login_prompt">Log in to access your stored credentials</string>
 </resources>
