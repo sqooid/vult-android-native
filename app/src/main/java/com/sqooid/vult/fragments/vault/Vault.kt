@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.sqooid.vult.R
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.sqooid.vult.database.Credential
+import com.sqooid.vult.database.CredentialField
 import com.sqooid.vult.database.DatabaseManager
 import com.sqooid.vult.databinding.FragmentVaultBinding
+import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -25,11 +27,18 @@ class Vault : Fragment() {
 
     private lateinit var viewModel: VaultViewModel
 
+    private lateinit var adapter: MainAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        adapter = MainAdapter(listOf())
+        binding.recyclerView.adapter = adapter
+
         return binding.root
     }
 
@@ -42,13 +51,24 @@ class Vault : Fragment() {
 
         binding.fabAdd.setOnClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
-                DatabaseManager.storeDao(requireContext()).insert(Credential(System.currentTimeMillis().toString(),"blah", listOf(),
-                    listOf()))
+                DatabaseManager.storeDao(requireContext()).insert(
+                    Credential(
+                        System.currentTimeMillis().toString(),
+                        "Credential",
+                        listOf("hobo", "homo", "chicken"),
+                        listOf(
+                            CredentialField("Email", "bob@gmail.com"),
+                            CredentialField("Username", "BigFoot69")
+                        )
+                    )
+                )
             }
         }
 
         viewModel.credentialList.observe(viewLifecycleOwner) {
             Log.d("app", it.toString())
+            adapter.data = it
+            binding.recyclerView.adapter?.notifyDataSetChanged()
         }
     }
 

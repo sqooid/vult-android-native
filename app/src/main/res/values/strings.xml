@@ -32,4 +32,5 @@
     <string name="log_in">Log in</string>
     <string name="master_password">Master password</string>
     <string name="login_prompt">Log in to access your stored credentials</string>
+    <string name="add_fab_description">Add credential</string>
 </resources>

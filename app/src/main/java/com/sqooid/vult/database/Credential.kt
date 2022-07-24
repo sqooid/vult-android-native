@@ -1,9 +1,6 @@
 package com.sqooid.vult.database
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
+import androidx.room.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -14,8 +11,17 @@ data class Credential(
     @PrimaryKey val id: String,
     @ColumnInfo val name: String,
     @ColumnInfo val tags: List<String>,
-    @ColumnInfo val fields: List<CredentialField>
-)
+    @ColumnInfo val fields: List<CredentialField>,
+) {
+    var expanded = false
+    fun getVisibleFields(): List<CredentialField> {
+        return fields
+        if (expanded || fields.isEmpty()) {
+            return fields
+        }
+        return listOf(fields[0])
+    }
+}
 
 @Serializable
 data class CredentialField(
