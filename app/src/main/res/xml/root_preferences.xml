@@ -4,6 +4,7 @@
 
         <SwitchPreferenceCompat
             app:key="@string/bio_key"
+            app:defaultValue="false"
             app:title="@string/biometrics_title" />
 
 

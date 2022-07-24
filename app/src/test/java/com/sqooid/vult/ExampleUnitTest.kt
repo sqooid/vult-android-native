@@ -1,7 +1,9 @@
 package com.sqooid.vult
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
+import org.mindrot.jbcrypt.BCrypt
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -11,6 +13,10 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val one = BCrypt.hashpw("hello", BCrypt.gensalt())
+        println(one)
+        val two = BCrypt.hashpw("hello", BCrypt.gensalt())
+        println(two)
+        assertNotEquals(one, two)
     }
 }

@@ -59,4 +59,11 @@ dependencies {
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
     implementation 'org.mindrot:jbcrypt:0.4'
 
+    def room_version = "2.4.2"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    // Sqlcipher
+    implementation "net.zetetic:android-database-sqlcipher:4.5.0"
+    implementation "androidx.sqlite:sqlite:2.2.0"
 }

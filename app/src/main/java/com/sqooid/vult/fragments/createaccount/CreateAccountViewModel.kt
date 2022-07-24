@@ -19,6 +19,6 @@ class CreateAccountViewModel(application: Application) : AndroidViewModel(applic
         if (passwordTooShort.value != PasswordValidator.PasswordWeakness.None) {
             return
         }
-        KeyManager.createMasterKey(context, masterPassword)
+        KeyManager.createSyncKey(context, masterPassword)
     }
 }
