@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/text_wrapper"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginBottom="20dp"
-    tools:hint="Hint"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:hint="@string/new_field_hint"
+    android:paddingTop="20dp"
+    android:paddingHorizontal="20dp"
+    android:paddingBottom="0dp"
+    android:layout_height="wrap_content"
+    tools:layout_editor_absoluteX="1dp"
+    tools:layout_editor_absoluteY="258dp">
+
     <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/text"
+        android:id="@+id/text_input_new_field"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </com.google.android.material.textfield.TextInputLayout>

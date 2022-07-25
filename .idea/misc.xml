@@ -15,10 +15,11 @@
         <entry key="app/src/main/res/layout/field_edit.xml" value="0.4356562633604104" />
         <entry key="app/src/main/res/layout/fragment_app.xml" value="0.45" />
         <entry key="app/src/main/res/layout/fragment_create_account.xml" value="0.4170444242973708" />
-        <entry key="app/src/main/res/layout/fragment_credential.xml" value="0.4365113296280462" />
+        <entry key="app/src/main/res/layout/fragment_credential.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_import.xml" value="0.2989583333333333" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.2989583333333333" />
         <entry key="app/src/main/res/layout/fragment_vault.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/new_field_dialog.xml" value="0.4356562633604104" />
         <entry key="app/src/main/res/layout/tag.xml" value="1.5" />
         <entry key="app/src/main/res/menu/app_menu.xml" value="0.5307291666666667" />
         <entry key="app/src/main/res/xml/root_preferences.xml" value="0.5" />
