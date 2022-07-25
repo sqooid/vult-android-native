@@ -3,25 +3,31 @@
     <PreferenceCategory app:title="@string/security_header">
 
         <SwitchPreferenceCompat
-            app:key="@string/bio_key"
             app:defaultValue="false"
+            app:key="@string/bio_key"
             app:title="@string/biometrics_title" />
 
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/sync_header">
+    <PreferenceCategory app:title="Default password generator settings">
 
+        <EditTextPreference
+            app:defaultValue="8"
+            app:key="@string/gen_def_length"
+            app:title="Length" />
         <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
+            app:defaultValue="true"
+            app:key="@string/gen_def_upper"
+            app:title="Use upper case" />
         <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+            app:defaultValue="true"
+            app:key="@string/gen_def_num"
+            app:title="Use number" />
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:key="@string/gen_def_sym"
+            app:title="Use symbols" />
 
     </PreferenceCategory>
 

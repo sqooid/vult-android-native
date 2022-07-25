@@ -2,6 +2,7 @@ package com.sqooid.vult.fragments.credential
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,7 +14,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.sqooid.vult.R
+import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
@@ -21,6 +25,8 @@ import com.sqooid.vult.databinding.FieldEditBinding
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
+import com.sqooid.vult.util.forceRefresh
+import kotlin.Exception
 
 class EditCredential : Fragment() {
     private var _binding: FragmentCredentialBinding? = null
@@ -53,6 +59,7 @@ class EditCredential : Fragment() {
         viewModel = ViewModelProvider(this).get(CredentialViewModel::class.java)
         viewModel.credential = credential
         binding.viewmodel = viewModel
+        binding.lifecycleOwner = this
 
         // Add field
         binding.buttonNewField.setOnClickListener {
@@ -93,6 +100,24 @@ class EditCredential : Fragment() {
             }
         }
 
+        // Generator settings
+        // Defaults
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        viewModel.passwordGeneratorSettings = PasswordGeneratorSettings(
+            prefs.getInt(getString(R.string.gen_def_length), 8),
+            prefs.getBoolean(getString(R.string.gen_def_upper), true),
+            prefs.getBoolean(getString(R.string.gen_def_num), true),
+            prefs.getBoolean(getString(R.string.gen_def_sym), true),
+        )
+        binding.buttonAddLength.setOnClickListener {
+            viewModel.increaseLength()
+        }
+        binding.buttonRemoveLength.setOnClickListener {
+            viewModel.decreaseLength()
+        }
+        binding.buttonGeneratePassword.setOnClickListener {
+            viewModel.generatePassword()
+        }
     }
 
     private fun addFieldInput(field: CredentialField) {

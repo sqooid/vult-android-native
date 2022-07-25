@@ -36,4 +36,11 @@
     <string name="password">Password</string>
     <string name="credential_name">Credential name</string>
     <string name="new_field_hint">Field name</string>
+    <string name="password_hint">Password</string>
+    <string name="password_generation_title">Password generation</string>
+    <string name="gen_def_length">generator_default_length</string>
+    <string name="gen_def_lower">generator_default_lowercase</string>
+    <string name="gen_def_upper">generator_default_uppercase</string>
+    <string name="gen_def_num">generator_default_number</string>
+    <string name="gen_def_sym">generator_default_symbols</string>
 </resources>
