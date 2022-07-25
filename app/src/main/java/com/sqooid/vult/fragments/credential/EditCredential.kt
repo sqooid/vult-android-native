@@ -54,24 +54,37 @@ class EditCredential : Fragment() {
         viewModel.credential = credential
         binding.viewmodel = viewModel
 
+        // Add field
         binding.buttonNewField.setOnClickListener {
             showAddFieldDialog()
         }
 
+        // Existing tags
         binding.existingTagsRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.existingTagsRecycler.adapter = TagAdapter(listOf())
-        viewModel.existingTags.observe(viewLifecycleOwner) {
+        binding.existingTagsRecycler.adapter = TagAdapter(listOf()) {
+            viewModel.addClickedTag(binding.existingTagsRecycler.getChildLayoutPosition(it))
+        }
+        viewModel.filteredExistingTags.observe(viewLifecycleOwner) {
             (binding.existingTagsRecycler.adapter as TagAdapter).tags = it
             binding.existingTagsRecycler.adapter!!.notifyDataSetChanged()
         }
 
+        // Added tags
         binding.attachedTagsRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.attachedTagsRecycler.adapter = TagAdapter(credential.tags.toList())
+        binding.attachedTagsRecycler.adapter = TagAdapter(credential.tags.toList()) {
+            viewModel.removeClickedTag(binding.attachedTagsRecycler.getChildLayoutPosition(it))
+        }
         viewModel.addedTags.observe(viewLifecycleOwner) {
             (binding.attachedTagsRecycler.adapter as TagAdapter).tags = it
             binding.attachedTagsRecycler.adapter!!.notifyDataSetChanged()
         }
 
+        // Filter tags
+        binding.tagInput.addTextChangedListener {
+            viewModel.filterExistingTags(it.toString())
+        }
+
+        // Add tag button
         binding.buttonAddTag.setOnClickListener {
             if (binding.tagInput.text.toString().isNotEmpty()) {
                 viewModel.addTypedTag()

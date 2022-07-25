@@ -1,5 +1,6 @@
 package com.sqooid.vult.fragments.vault.recyclerview
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -29,12 +30,15 @@ class FieldAdapter(var fields: List<CredentialField>) : RecyclerView.Adapter<Fie
     }
 }
 
-class TagAdapter(var tags: List<String>) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
+class TagAdapter(var tags: List<String>, private val onClick: ((view: View) -> Unit)? = null) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
     class TagViewHolder(val binding: TagBinding) : RecyclerView.ViewHolder(binding.root) {}
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = TagBinding.inflate(inflater, parent, false)
+        binding.root.setOnClickListener {
+            onClick?.let { func -> func(it) }
+        }
         return TagViewHolder(binding)
     }
 

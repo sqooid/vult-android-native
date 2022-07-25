@@ -1,10 +1,7 @@
 package com.sqooid.vult.database
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface StoreDao {
@@ -13,4 +10,10 @@ interface StoreDao {
 
     @Insert
     fun insert(cred: Credential)
+
+    @Update
+    fun update(cred: Credential)
+
+    @Query("select * from store where id = :id")
+    fun getById(id: String): Credential?
 }

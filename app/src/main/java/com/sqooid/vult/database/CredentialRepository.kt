@@ -1,7 +1,11 @@
 package com.sqooid.vult.database
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
+import com.sqooid.vult.auth.Crypto
+import net.sqlcipher.database.SQLiteConstraintException
+import java.lang.Exception
 
 class CredentialRepository {
     companion object {
@@ -27,6 +31,25 @@ class CredentialRepository {
             return tagList!!.iterator().asSequence().sortedBy {
                 it.value
             }.map { it.key }.toList()
+        }
+
+        suspend fun updateCredential(context: Context, credential: Credential) {
+            val dao = DatabaseManager.storeDao(context)
+            dao.update(credential)
+        }
+
+        suspend fun addCredential(context: Context, credential: Credential) {
+        val dao = DatabaseManager.storeDao(context)
+            var successful = false
+            do {
+                try {
+                    dao.insert(credential)
+                    successful = true
+                } catch (e: SQLiteConstraintException) {
+                    Log.d("app", e.toString())
+                    credential.id = Crypto.generateId(24)
+                }
+            } while (!successful)
         }
     }
 }

@@ -11,8 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sqooid.vult.database.Credential
-import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.database.DatabaseManager
+import com.sqooid.vult.database.CredentialRepository
 import com.sqooid.vult.databinding.FragmentVaultBinding
 import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
 import kotlinx.coroutines.Dispatchers
@@ -51,8 +50,13 @@ class Vault : Fragment() {
         Log.d("app", viewModel.credentialList.value.toString())
 
         binding.fabAdd.setOnClickListener {
-//            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
-
+            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
+//            lifecycleScope.launch(Dispatchers.IO) {
+//                CredentialRepository.addCredential(requireContext(), Credential("same","Thing",
+//                    mutableSetOf("hello","work","secondary","shit"), arrayListOf(), "nothing"
+//                )
+//                )
+//            }
         }
 
         viewModel.credentialList.observe(viewLifecycleOwner) {
