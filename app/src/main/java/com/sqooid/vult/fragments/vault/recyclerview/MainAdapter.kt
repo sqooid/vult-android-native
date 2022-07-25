@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
@@ -80,16 +81,14 @@ class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): R
         }
 
         setExpansionVisibility(false, binding)
-        binding.card.doOnLayout { card ->
-            holder.collapsedHeight = card.height
-            setExpansionVisibility(true, binding)
-            card.doOnPreDraw {
-                holder.expandedHeight = it.height
-                Log.d("app", "collapsed height: ${holder.collapsedHeight}")
-                Log.d("app", "expanded height: ${holder.expandedHeight}")
-                setExpansionVisibility(credential.expanded, binding)
-            }
-        }
+        holder.binding.card.measure(View.MeasureSpec.makeMeasureSpec(recyclerView.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        holder.collapsedHeight = holder.binding.card.measuredHeight
+        setExpansionVisibility(true, binding)
+        holder.binding.card.measure(View.MeasureSpec.makeMeasureSpec(recyclerView.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        holder.expandedHeight = holder.binding.card.measuredHeight
+        setExpansionVisibility(credential.expanded, binding)
+        holder.binding.card.layoutParams.height = if (credential.expanded) holder.expandedHeight else holder.collapsedHeight
+        holder.binding.card.requestLayout()
 
         binding.root.setOnClickListener {
             if (!holder.animating) {
@@ -115,7 +114,6 @@ class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): R
     }
 
     private fun expandItem(holder: ViewHolder, expand:Boolean) {
-        Log.d("app", "expanding: ${holder.collapsedHeight} , ${holder.expandedHeight}")
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 250
             interpolator = AccelerateDecelerateInterpolator()

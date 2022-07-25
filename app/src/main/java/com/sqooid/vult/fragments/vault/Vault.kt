@@ -54,12 +54,9 @@ class Vault : Fragment() {
                 DatabaseManager.storeDao(requireContext()).insert(
                     Credential(
                         System.currentTimeMillis().toString(),
-                        "Credential",
+                        "Bredential",
                         listOf("hobo", "homo", "chicken"),
-                        listOf(
-                            CredentialField("Email", "bob@gmail.com"),
-                            CredentialField("Username", "BigFoot69")
-                        ),
+                        listOf(),
                         "VeryNicePassword"
                     )
                 )
