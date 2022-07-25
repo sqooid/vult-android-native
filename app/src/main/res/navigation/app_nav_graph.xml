@@ -6,9 +6,14 @@
     app:startDestination="@id/vault">
     <fragment
         android:id="@+id/credential"
-        android:name="com.sqooid.vult.fragments.credential.Credential"
+        android:name="com.sqooid.vult.fragments.credential.EditCredential"
         android:label="fragment_credential"
-        tools:layout="@layout/fragment_credential" />
+        tools:layout="@layout/fragment_credential" >
+        <argument
+            android:name="credential"
+            app:argType="com.sqooid.vult.database.Credential"
+            app:nullable="true" />
+    </fragment>
     <fragment
         android:id="@+id/vault"
         android:name="com.sqooid.vult.fragments.vault.Vault"
@@ -18,7 +23,7 @@
             android:id="@+id/action_vault_to_credential"
             app:destination="@id/credential" />
         <action
-            android:id="@+id/action_vault_to_settings2"
+            android:id="@+id/action_vault_to_settings"
             app:destination="@id/settings" />
     </fragment>
     <fragment

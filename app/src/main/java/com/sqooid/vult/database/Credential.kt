@@ -1,30 +1,20 @@
 package com.sqooid.vult.database
 
+import android.os.Parcelable
 import androidx.room.*
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "Store")
+@Parcelize
 data class Credential(
-    @PrimaryKey val id: String,
-    @ColumnInfo val name: String,
+    @PrimaryKey var id: String,
+    @ColumnInfo var name: String,
     @ColumnInfo val tags: List<String>,
     @ColumnInfo val fields: List<CredentialField>,
-    @ColumnInfo val password: String,
-) {
+    @ColumnInfo var password: String,
+) : Parcelable {
+    @IgnoredOnParcel
     var expanded = false
-    fun getVisibleFields(): List<CredentialField> {
-        if (expanded || fields.isEmpty()) {
-            return fields
-        }
-        return listOf(fields[0])
-    }
 }
 
-@Serializable
-data class CredentialField(
-    val name: String,
-    val value: String
-)

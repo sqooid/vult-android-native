@@ -2,6 +2,7 @@ package com.sqooid.vult.auth
 
 import android.util.Base64
 import java.nio.charset.Charset
+import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
@@ -26,6 +27,12 @@ class Crypto {
             val cipherText = Base64.decode(split[1], Base64.NO_PADDING or Base64.NO_WRAP)
             cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
             return cipher.doFinal(cipherText).toString(Charset.defaultCharset())
+        }
+
+        fun generateId(bytes: Int): String {
+            val array = ByteArray(bytes)
+            SecureRandom().nextBytes(array)
+            return Base64.encode(array, Base64.NO_WRAP or Base64.NO_PADDING).toString(Charset.defaultCharset())
         }
     }
 }

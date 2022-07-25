@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
@@ -50,17 +51,7 @@ class Vault : Fragment() {
         Log.d("app", viewModel.credentialList.value.toString())
 
         binding.fabAdd.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                DatabaseManager.storeDao(requireContext()).insert(
-                    Credential(
-                        System.currentTimeMillis().toString(),
-                        "Bredential",
-                        listOf("hobo", "homo", "chicken","aiuhfasdfasdfhaskdjfhasdk","aslkfjhaskljfhasdklfh"),
-                        listOf(),
-                        "VeryNicePassword"
-                    )
-                )
-            }
+            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
         }
 
         viewModel.credentialList.observe(viewLifecycleOwner) {
