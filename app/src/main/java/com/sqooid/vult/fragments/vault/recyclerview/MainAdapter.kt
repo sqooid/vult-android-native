@@ -2,10 +2,7 @@ package com.sqooid.vult.fragments.vault.recyclerview
 
 import android.animation.ValueAnimator
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
@@ -18,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.databinding.CredentialTileBinding
 
-class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): RecyclerView.Adapter<MainAdapter.ViewHolder>() {
+class MainAdapter(var data: List<Credential>, private val recyclerView: RecyclerView): RecyclerView.Adapter<MainAdapter.ViewHolder>() {
     class ViewHolder(val binding: CredentialTileBinding) : RecyclerView.ViewHolder(binding.root){
         var collapsedHeight = 0
         var expandedHeight = 0
@@ -30,12 +27,11 @@ class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): R
             .inflate(LayoutInflater.from(parent.context), parent, false)
 
         binding.tagContainer.layoutManager = LinearLayoutManager(parent.context, LinearLayoutManager.HORIZONTAL, false)
-        binding.tagContainer.adapter = TagAdapter(listOf())
-        binding.tagContainer.suppressLayout(true)
+        binding.tagContainer.adapter = TagAdapter(listOf(), binding.card)
 
         binding.fieldContainer.layoutManager = LinearLayoutManager(parent.context)
-        binding.fieldContainer.adapter = FieldAdapter(listOf())
-        binding.tagContainer.suppressLayout(true)
+        binding.fieldContainer.adapter = FieldAdapter(listOf(), binding.card)
+        binding.fieldContainer.suppressLayout(true)
 
         return ViewHolder(binding)
     }
@@ -50,13 +46,11 @@ class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): R
 
         // Tags
         if (credential.tags.isNotEmpty()) {
-            binding.tagScrollView.visibility = View.VISIBLE
+            binding.tagContainer.isVisible = true
             (binding.tagContainer.adapter as TagAdapter).tags = credential.tags
-            binding.tagContainer.suppressLayout(false)
             binding.tagContainer.adapter!!.notifyDataSetChanged()
-            binding.tagContainer.suppressLayout(false)
         } else {
-            binding.tagScrollView.visibility = View.GONE
+            binding.tagContainer.isVisible = false
         }
 
         // First field
@@ -66,9 +60,9 @@ class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): R
             binding.firstField.textValue.text = credential.fields[0].value
 
             if (credential.fields.size > 1) {
-                binding.tagContainer.suppressLayout(false)
+                binding.fieldContainer.suppressLayout(false)
                 (binding.fieldContainer.adapter as FieldAdapter).fields = credential.fields.slice(1 until credential.fields.size)
-                binding.tagContainer.suppressLayout(true)
+                binding.fieldContainer.suppressLayout(true)
             }
             binding.fieldContainer.adapter!!.notifyDataSetChanged()
 
