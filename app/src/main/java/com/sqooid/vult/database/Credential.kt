@@ -12,6 +12,7 @@ data class Credential(
     @ColumnInfo val name: String,
     @ColumnInfo val tags: List<String>,
     @ColumnInfo val fields: List<CredentialField>,
+    @ColumnInfo val password: String,
 ) {
     var expanded = false
     fun getVisibleFields(): List<CredentialField> {

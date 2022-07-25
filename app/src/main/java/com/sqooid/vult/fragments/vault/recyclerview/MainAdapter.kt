@@ -1,72 +1,135 @@
 package com.sqooid.vult.fragments.vault.recyclerview
 
-import android.animation.LayoutTransition
+import android.animation.ValueAnimator
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
-import androidx.constraintlayout.helper.widget.Carousel
+import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
+import androidx.core.view.doOnLayout
+import androidx.core.view.doOnNextLayout
+import androidx.core.view.doOnPreDraw
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sqooid.vult.R
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.databinding.CredentialTileBinding
-import com.sqooid.vult.databinding.FieldBinding
-import com.sqooid.vult.databinding.TagBinding
 
-class MainAdapter(var data: List<Credential>): RecyclerView.Adapter<MainAdapter.ViewHolder>() {
+class MainAdapter(var data: List<Credential>, val recyclerView: RecyclerView): RecyclerView.Adapter<MainAdapter.ViewHolder>() {
     class ViewHolder(val binding: CredentialTileBinding) : RecyclerView.ViewHolder(binding.root){
-        var expanded = false
+        var collapsedHeight = 0
+        var expandedHeight = 0
+        var animating = false
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = CredentialTileBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
-        val layout = binding.linearLayout
-        layout.layoutTransition = LayoutTransition().apply {
-            enableTransitionType(LayoutTransition.CHANGING)
-        }
+
         binding.tagContainer.layoutManager = LinearLayoutManager(parent.context, LinearLayoutManager.HORIZONTAL, false)
         binding.tagContainer.adapter = TagAdapter(listOf())
+        binding.tagContainer.suppressLayout(true)
+
         binding.fieldContainer.layoutManager = LinearLayoutManager(parent.context)
         binding.fieldContainer.adapter = FieldAdapter(listOf())
-        binding.card.animation = AnimationUtils.loadAnimation(parent.context, R.anim.fade_in)
+        binding.tagContainer.suppressLayout(true)
+
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.expanded = false
         val binding = holder.binding
         val credential = data[position]
         binding.textViewName.text = credential.name
+
+        // Password
+        binding.password.text = credential.password
 
         // Tags
         if (credential.tags.isNotEmpty()) {
             binding.tagScrollView.visibility = View.VISIBLE
             (binding.tagContainer.adapter as TagAdapter).tags = credential.tags
+            binding.tagContainer.suppressLayout(false)
+            binding.tagContainer.adapter!!.notifyDataSetChanged()
+            binding.tagContainer.suppressLayout(false)
         } else {
             binding.tagScrollView.visibility = View.GONE
         }
 
         // First field
         if (credential.fields.isNotEmpty()) {
-            binding.fieldContainer.visibility = View.VISIBLE
-            (binding.fieldContainer.adapter as FieldAdapter).fields = credential.getVisibleFields()
-            Log.d("app", "bound ${credential.getVisibleFields()}")
-            binding.fieldContainer.adapter!!.notifyDataSetChanged()
-            // Expand when clicked
-            binding.root.setOnClickListener {
-                Log.d("app","clicked tile $position")
-                credential.expanded = !credential.expanded
-                (binding.fieldContainer.adapter as FieldAdapter).fields = credential.getVisibleFields()
-                binding.fieldContainer.adapter!!.notifyDataSetChanged()
-                this.notifyItemChanged(position)
-                this.notifyDataSetChanged()
+            binding.firstField.fieldLayout.visibility = View.VISIBLE
+            binding.firstField.textFieldName.text = credential.fields[0].name
+            binding.firstField.textValue.text = credential.fields[0].value
+
+            if (credential.fields.size > 1) {
+                binding.tagContainer.suppressLayout(false)
+                (binding.fieldContainer.adapter as FieldAdapter).fields = credential.fields.slice(1 until credential.fields.size)
+                binding.tagContainer.suppressLayout(true)
             }
+            binding.fieldContainer.adapter!!.notifyDataSetChanged()
+
+            setExpansionVisibility(credential.expanded, binding)
+
         } else {
             binding.fieldContainer.visibility = View.GONE
+            binding.firstField.fieldLayout.visibility = View.GONE
+            binding.password.visibility = View.GONE
         }
+
+        setExpansionVisibility(false, binding)
+        binding.card.doOnLayout { card ->
+            holder.collapsedHeight = card.height
+            setExpansionVisibility(true, binding)
+            card.doOnPreDraw {
+                holder.expandedHeight = it.height
+                Log.d("app", "collapsed height: ${holder.collapsedHeight}")
+                Log.d("app", "expanded height: ${holder.expandedHeight}")
+                setExpansionVisibility(credential.expanded, binding)
+            }
+        }
+
+        binding.root.setOnClickListener {
+            if (!holder.animating) {
+                credential.expanded = !credential.expanded
+                expandItem(holder, credential.expanded)
+            }
+        }
+    }
+
+    private fun setExpansionVisibility(
+        expand: Boolean,
+        binding: CredentialTileBinding
+    ) {
+        if (expand) {
+            binding.fieldContainer.isVisible = true
+            binding.password.isVisible = true
+            binding.passwordTitle.isVisible = true
+        } else {
+            binding.fieldContainer.isVisible = false
+            binding.password.isVisible = false
+            binding.passwordTitle.isVisible = false
+        }
+    }
+
+    private fun expandItem(holder: ViewHolder, expand:Boolean) {
+        Log.d("app", "expanding: ${holder.collapsedHeight} , ${holder.expandedHeight}")
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 250
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener {
+                holder.binding.card.layoutParams.height = (holder.collapsedHeight + (holder.expandedHeight - holder.collapsedHeight) * it.animatedValue as Float).toInt()
+                holder.binding.card.requestLayout()
+            }
+        }
+        if (expand) animator.doOnStart { setExpansionVisibility(true, holder.binding) }
+        else animator.doOnEnd { setExpansionVisibility(false, holder.binding) }
+        animator.doOnStart { holder.animating = true }
+        animator.doOnEnd { holder.animating = false }
+        if (!expand) animator.reverse()
+        else animator.start()
     }
 
     override fun getItemCount(): Int {

@@ -36,7 +36,7 @@ class Vault : Fragment() {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = MainAdapter(listOf())
+        adapter = MainAdapter(listOf(), binding.recyclerView)
         binding.recyclerView.adapter = adapter
 
         return binding.root
@@ -59,7 +59,8 @@ class Vault : Fragment() {
                         listOf(
                             CredentialField("Email", "bob@gmail.com"),
                             CredentialField("Username", "BigFoot69")
-                        )
+                        ),
+                        "VeryNicePassword"
                     )
                 )
             }
