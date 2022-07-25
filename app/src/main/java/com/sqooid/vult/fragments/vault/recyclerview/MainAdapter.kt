@@ -27,10 +27,10 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
             .inflate(LayoutInflater.from(parent.context), parent, false)
 
         binding.tagContainer.layoutManager = LinearLayoutManager(parent.context, LinearLayoutManager.HORIZONTAL, false)
-        binding.tagContainer.adapter = TagAdapter(listOf(), binding.card)
+        binding.tagContainer.adapter = TagAdapter(listOf())
 
         binding.fieldContainer.layoutManager = LinearLayoutManager(parent.context)
-        binding.fieldContainer.adapter = FieldAdapter(listOf(), binding.card)
+        binding.fieldContainer.adapter = FieldAdapter(listOf())
         binding.fieldContainer.suppressLayout(true)
 
         return ViewHolder(binding)
@@ -47,7 +47,7 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
         // Tags
         if (credential.tags.isNotEmpty()) {
             binding.tagContainer.isVisible = true
-            (binding.tagContainer.adapter as TagAdapter).tags = credential.tags
+            (binding.tagContainer.adapter as TagAdapter).tags = credential.tags.toList()
             binding.tagContainer.adapter!!.notifyDataSetChanged()
         } else {
             binding.tagContainer.isVisible = false

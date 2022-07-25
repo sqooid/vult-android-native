@@ -10,8 +10,8 @@ import kotlinx.parcelize.Parcelize
 data class Credential(
     @PrimaryKey var id: String,
     @ColumnInfo var name: String,
-    @ColumnInfo val tags: List<String>,
-    @ColumnInfo val fields: List<CredentialField>,
+    @ColumnInfo val tags: MutableSet<String>,
+    @ColumnInfo val fields: ArrayList<CredentialField>,
     @ColumnInfo var password: String,
 ) : Parcelable {
     @IgnoredOnParcel

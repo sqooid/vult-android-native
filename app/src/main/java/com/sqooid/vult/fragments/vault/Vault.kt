@@ -51,7 +51,8 @@ class Vault : Fragment() {
         Log.d("app", viewModel.credentialList.value.toString())
 
         binding.fabAdd.setOnClickListener {
-            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
+//            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
+
         }
 
         viewModel.credentialList.observe(viewLifecycleOwner) {

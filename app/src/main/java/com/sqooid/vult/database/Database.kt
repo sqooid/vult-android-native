@@ -17,19 +17,19 @@ abstract class Database : RoomDatabase() {
 
 class Converters {
     @TypeConverter
-    fun listStringToString(list: List<String>): String {
+    fun setToString(list: MutableSet<String>): String {
         return Json.encodeToString(list)
     }
     @TypeConverter
-    fun stringToListString(str: String): List<String> {
+    fun stringToSet(str: String): MutableSet<String> {
         return Json.decodeFromString(str)
     }
     @TypeConverter
-    fun listCredFieldToString(list: List<CredentialField>): String {
+    fun listCredFieldToString(list: ArrayList<CredentialField>): String {
         return Json.encodeToString(list)
     }
     @TypeConverter
-    fun stringToListCredField(str: String): List<CredentialField> {
+    fun stringToListCredField(str: String): ArrayList<CredentialField> {
         return Json.decodeFromString(str)
     }
     @TypeConverter
