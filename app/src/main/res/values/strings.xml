@@ -43,4 +43,5 @@
     <string name="gen_def_upper">generator_default_uppercase</string>
     <string name="gen_def_num">generator_default_number</string>
     <string name="gen_def_sym">generator_default_symbols</string>
+    <string name="search">Search</string>
 </resources>

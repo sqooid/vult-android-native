@@ -1,6 +1,7 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/security_header">
+    <PreferenceCategory app:title="@string/security_header"
+        app:iconSpaceReserved="false">
 
         <SwitchPreferenceCompat
             app:defaultValue="false"
@@ -10,7 +11,8 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="Default password generator settings">
+    <PreferenceCategory app:title="Default password generator settings"
+        app:iconSpaceReserved="false">
 
         <EditTextPreference
             app:defaultValue="8"

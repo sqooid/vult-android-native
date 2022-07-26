@@ -4,11 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.29376498800959233" />
+        <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.43" />
         <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.342" />
         <entry key="app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.342" />
         <entry key="app/src/main/res/drawable/ic_baseline_sync_24.xml" value="0.342" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.3025" />
         <entry key="app/src/main/res/drawable/ic_vult_logo_new.xml" value="0.49" />
+        <entry key="app/src/main/res/layout-v31/fragment_vault.xml" value="0.43072916666666666" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.5317708333333333" />
         <entry key="app/src/main/res/layout/credential_tile.xml" value="0.5" />
         <entry key="app/src/main/res/layout/field.xml" value="0.33" />
@@ -18,7 +20,7 @@
         <entry key="app/src/main/res/layout/fragment_credential.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_import.xml" value="0.2989583333333333" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.2989583333333333" />
-        <entry key="app/src/main/res/layout/fragment_vault.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_vault.xml" value="0.3221919937815779" />
         <entry key="app/src/main/res/layout/new_field_dialog.xml" value="0.4356562633604104" />
         <entry key="app/src/main/res/layout/tag.xml" value="1.5" />
         <entry key="app/src/main/res/layout/tag_input_dialog.xml" value="0.4356562633604104" />

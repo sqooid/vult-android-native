@@ -104,7 +104,7 @@ class EditCredential : Fragment() {
         // Defaults
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         viewModel.passwordGeneratorSettings = PasswordGeneratorSettings(
-            prefs.getInt(getString(R.string.gen_def_length), 8),
+            try { prefs.getString(getString(R.string.gen_def_length), "8")!!.toInt() } catch (e: Exception) { 8 },
             prefs.getBoolean(getString(R.string.gen_def_upper), true),
             prefs.getBoolean(getString(R.string.gen_def_num), true),
             prefs.getBoolean(getString(R.string.gen_def_sym), true),
