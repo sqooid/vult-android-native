@@ -45,21 +45,22 @@ class Crypto {
             val nums = "1234567890"
             val syms = "!@#$%^&*+=-()`~;:?."
             // Start chucking in other chars every 10 chars
-            val builder = StringBuilder()
+            val builder = ArrayList<Char>()
             val random = SecureRandom()
             for (i in 1..settings.length) {
                 val step = i % 10
                 if (step == 1 && settings.useUppercase) {
-                    builder.append(upper[random.nextInt(upper.length)])
+                    builder.add(upper[random.nextInt(upper.length)])
                 } else if (step == 2 && settings.useNumbers) {
-                    builder.append(nums[random.nextInt(nums.length)])
+                    builder.add(nums[random.nextInt(nums.length)])
                 } else if (step == 3 && settings.useSymbols) {
-                    builder.append(syms[random.nextInt(syms.length)])
+                    builder.add(syms[random.nextInt(syms.length)])
                 } else {
-                    builder.append(lower[random.nextInt(lower.length)])
+                    builder.add(lower[random.nextInt(lower.length)])
                 }
             }
-            return builder.toString()
+            builder.shuffle(random)
+            return builder.joinToString("")
         }
     }
 }

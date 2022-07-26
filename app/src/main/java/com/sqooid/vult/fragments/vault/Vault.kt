@@ -58,14 +58,15 @@ class Vault : Fragment() {
         binding.viewmodel = viewModel
 
         binding.fabAdd.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                CredentialRepository.addCredential(requireContext(), Credential("same","Thing",
-                    mutableSetOf("hello","work","secondary","shit"), arrayListOf(CredentialField("Email","chieck@super.das"),
-                        CredentialField("Username","dasauto")
-                    ), "nothing"
-                )
-                )
-            }
+            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
+//            lifecycleScope.launch(Dispatchers.IO) {
+//                CredentialRepository.addCredential(requireContext(), Credential("same","Thing",
+//                    mutableSetOf("hello","work","secondary","shit"), arrayListOf(CredentialField("Email","chieck@super.das"),
+//                        CredentialField("Username","dasauto")
+//                    ), "nothing"
+//                )
+//                )
+//            }
         }
 
         binding.swipeDownSync.setOnRefreshListener {
