@@ -63,7 +63,7 @@ class Login : Fragment() {
     }
 
     private fun navToVault() {
-        this.findNavController().navigate(LoginDirections.actionLoginToApp())
+        this.findNavController().navigate(LoginDirections.actionLoginToVault())
     }
 
     private fun showBiometricPrompt() {

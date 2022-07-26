@@ -11,18 +11,15 @@
         android:label="fragment_create_account"
         tools:layout="@layout/fragment_create_account">
         <action
-            android:id="@+id/action_createAccount_to_app"
-            app:destination="@id/app"
-            app:enterAnim="@anim/slide_in_from_right"
-            app:exitAnim="@anim/fade_out"
-            app:popUpToInclusive="false" />
-        <action
             android:id="@+id/action_createAccount_to_importAccount"
             app:destination="@id/importAccount"
             app:enterAnim="@anim/slide_in_from_right"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_createAccount_to_vault"
+            app:destination="@id/vault" />
     </fragment>
     <fragment
         android:id="@+id/login"
@@ -30,21 +27,42 @@
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
         <action
-            android:id="@+id/action_login_to_app"
-            app:destination="@id/app" />
+            android:id="@+id/action_login_to_vault"
+            app:destination="@id/vault" />
     </fragment>
-    <fragment
-        android:id="@+id/app"
-        android:name="com.sqooid.vult.App"
-        android:label="fragment_app"
-        tools:layout="@layout/fragment_app" />
     <fragment
         android:id="@+id/importAccount"
         android:name="com.sqooid.vult.fragments.importaccount.ImportAccount"
         android:label="fragment_import_account"
         tools:layout="@layout/fragment_import_account">
         <action
-            android:id="@+id/action_importAccount_to_app"
-            app:destination="@id/app" />
+            android:id="@+id/action_importAccount_to_vault"
+            app:destination="@id/vault" />
     </fragment>
+    <fragment
+        android:id="@+id/credential"
+        android:name="com.sqooid.vult.fragments.credential.EditCredential"
+        android:label="fragment_credential"
+        tools:layout="@layout/fragment_credential" >
+        <argument
+            android:name="credential"
+            app:argType="com.sqooid.vult.database.Credential"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/vault"
+        android:name="com.sqooid.vult.fragments.vault.Vault"
+        android:label="fragment_vault"
+        tools:layout="@layout/fragment_vault">
+        <action
+            android:id="@+id/action_vault_to_credential"
+            app:destination="@id/credential" />
+        <action
+            android:id="@+id/action_vault_to_settings"
+            app:destination="@id/settings" />
+    </fragment>
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.sqooid.vult.Settings"
+        android:label="Settings" />
 </navigation>

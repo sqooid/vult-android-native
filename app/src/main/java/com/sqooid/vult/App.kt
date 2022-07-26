@@ -6,10 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.sqooid.vult.databinding.FragmentAppBinding
 
 // TODO: Rename parameter arguments, choose names that match
@@ -33,9 +38,9 @@ class App : Fragment() {
         _binding = FragmentAppBinding.inflate(inflater, container, false)
 
         binding.appToolbar.inflateMenu(R.menu.app_menu)
-        binding.appToolbar.updatePadding(left = -48)
+//        binding.appToolbar.updatePadding()
         val searchView = binding.appToolbar.menu.findItem(R.id.filter).actionView as SearchView
-        searchView.maxWidth = Int.MAX_VALUE
+//        searchView.maxWidth = Int.MAX_VALUE
         val searchBar = searchView.findViewById(androidx.appcompat.R.id.search_bar) as LinearLayout
         val transition = LayoutTransition().apply {
             setDuration(200)
@@ -44,6 +49,8 @@ class App : Fragment() {
             disableTransitionType(LayoutTransition.APPEARING)
         }
         searchBar.layoutTransition = transition
+
+        binding.appToolbar.setupWithNavController(findNavController())
 
         return binding.root
     }

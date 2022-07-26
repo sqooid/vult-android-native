@@ -80,7 +80,7 @@ class CreateAccount : Fragment() {
                 .setNegativeButton("Later", null)
                 .setOnDismissListener {
                     this.findNavController()
-                        .navigate(CreateAccountDirections.actionCreateAccountToApp())
+                        .navigate(CreateAccountDirections.actionCreateAccountToVault())
                 }
                 .show()
         }
