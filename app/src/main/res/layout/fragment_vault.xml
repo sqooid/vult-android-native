@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="viewmodel"
             type="com.sqooid.vult.fragments.vault.VaultViewModel" />
@@ -107,6 +106,7 @@
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/search_bar"
+                        android:text="@={viewmodel.searchText}"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:shapeAppearanceOverlay="@style/PillButtonStyle" />

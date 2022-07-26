@@ -43,6 +43,7 @@ class Vault : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = this
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = MainAdapter(listOf(), binding.recyclerView)
@@ -56,10 +57,7 @@ class Vault : Fragment() {
         viewModel = ViewModelProvider(this).get(VaultViewModel::class.java)
         binding.viewmodel = viewModel
 
-        Log.d("app", viewModel.credentialList.value.toString())
-
         binding.fabAdd.setOnClickListener {
-//            findNavController().navigate(VaultDirections.actionVaultToCredential(null))
             lifecycleScope.launch(Dispatchers.IO) {
                 CredentialRepository.addCredential(requireContext(), Credential("same","Thing",
                     mutableSetOf("hello","work","secondary","shit"), arrayListOf(CredentialField("Email","chieck@super.das"),
@@ -100,9 +98,20 @@ class Vault : Fragment() {
         })
 
         viewModel.credentialList.observe(viewLifecycleOwner) {
-            Log.d("app", it.toString())
-            adapter.data = it
-            binding.recyclerView.adapter?.notifyDataSetChanged()
+            if (it != null) {
+                viewModel.filterCredentials("")
+            }
+        }
+
+        viewModel.filterCredentialList.observe(viewLifecycleOwner) {
+            if (it != null) {
+                adapter.data = it
+                binding.recyclerView.adapter?.notifyDataSetChanged()
+            }
+        }
+
+        viewModel.searchText.observe(viewLifecycleOwner) {
+            if (it != null) viewModel.filterCredentials(it)
         }
     }
 
