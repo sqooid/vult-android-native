@@ -59,6 +59,11 @@ class Vault : Fragment() {
 //            }
         }
 
+        binding.swipeDownSync.setOnRefreshListener {
+            Log.d("app","swiped down to sync")
+            binding.swipeDownSync.isRefreshing = false
+        }
+
         viewModel.credentialList.observe(viewLifecycleOwner) {
             Log.d("app", it.toString())
             adapter.data = it
