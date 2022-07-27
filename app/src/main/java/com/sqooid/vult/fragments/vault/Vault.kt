@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sqooid.vult.databinding.FragmentVaultBinding
 import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
 import java.util.*
+import kotlin.collections.ArrayList
 
 class Vault : Fragment() {
     private var _binding: FragmentVaultBinding? = null
@@ -65,7 +66,9 @@ class Vault : Fragment() {
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = MainAdapter(listOf(), binding.recyclerView) {
-            findNavController().navigate(VaultDirections.actionVaultToCredential(adapter.data[it]))
+            val cred = adapter.data[it]
+            val clone = cred.copy(tags = cred.tags.toMutableSet(), fields = ArrayList(cred.fields))
+            findNavController().navigate(VaultDirections.actionVaultToCredential(clone))
         }
         binding.recyclerView.adapter = adapter
 

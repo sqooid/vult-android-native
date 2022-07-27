@@ -18,7 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.sqooid.vult.R
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
@@ -30,6 +32,7 @@ import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.Integer.min
 import kotlin.math.max
 
 class EditCredential : Fragment() {
@@ -51,25 +54,47 @@ class EditCredential : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         val credential = args.credential ?: Credential(
             Crypto.generateId(24), "", mutableSetOf(), arrayListOf(
                 CredentialField("Username", ""),
                 CredentialField("Email", "")
             ), ""
         )
-        for (field in credential.fields) {
-            addFieldInput(field)
-        }
-
         viewModel = ViewModelProvider(this).get(CredentialViewModel::class.java)
         viewModel.credential = credential
         binding.viewmodel = viewModel
         binding.lifecycleOwner = this
-
         binding.credRoot.layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
         }
 
+        // Field edit
+        binding.fieldEditBlock.adapter = FieldEditAdapter(credential.fields)
+        binding.fieldEditBlock.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                Log.d("app", "dragged")
+                val fromPos = viewHolder.adapterPosition
+                val toPos = target.adapterPosition
+                viewModel.swapFields(fromPos, toPos)
+                recyclerView.adapter?.notifyItemMoved(fromPos, toPos)
+                return true
+            }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                Log.d("app", "swiped")
+                val index = viewHolder.adapterPosition
+                viewModel.removeField(index)
+                binding.fieldEditBlock.adapter?.notifyItemRemoved(index)
+            }
+        })
+        touchHelper.attachToRecyclerView(binding.fieldEditBlock)
+
+        // Show/hide delete button
         isNew = args.credential == null
         if (!isNew) {
             binding.fabDelete.isVisible = true
@@ -147,6 +172,8 @@ class EditCredential : Fragment() {
             prefs.getBoolean(getString(R.string.gen_def_num), true),
             prefs.getBoolean(getString(R.string.gen_def_sym), true),
         )
+
+        // Password length/generator
         binding.buttonAddLength.setOnClickListener {
             viewModel.increaseLength()
         }
@@ -193,25 +220,13 @@ class EditCredential : Fragment() {
             .show()
     }
 
-    private fun addFieldInput(field: CredentialField) {
-        val newField =
-            FieldEditBinding.inflate(layoutInflater, binding.fieldEditBlock, false).apply {
-                textWrapper.hint = field.name
-                text.text = text.text?.append(field.value)
-                text.addTextChangedListener {
-                    field.value = it.toString()
-                }
-            }
-        binding.fieldEditBlock.addView(newField.root)
-    }
-
-    fun showAddFieldDialog() {
+    private fun showAddFieldDialog() {
         val textInputView = NewFieldDialogBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(requireActivity()).setTitle("Add new field")
             .setPositiveButton("Add") { _, _ ->
                 val fieldName = textInputView.textInputNewField.text.toString()
-                viewModel.addField(fieldName)
-                addFieldInput(viewModel.credential.fields.last())
+                val index = viewModel.addField(fieldName)
+                binding.fieldEditBlock.adapter?.notifyItemInserted(index)
             }
             .setNegativeButton("Cancel", null)
             .setOnDismissListener {

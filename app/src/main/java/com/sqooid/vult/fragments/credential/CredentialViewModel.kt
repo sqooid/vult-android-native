@@ -35,8 +35,9 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
 
     var newTagValue: String = ""
 
-    fun addField(fieldName: String) {
+    fun addField(fieldName: String): Int {
         credential.fields.add(CredentialField(fieldName, ""))
+        return credential.fields.size - 1
     }
 
     fun addTypedTag() {
@@ -102,5 +103,15 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
             credential.password = Crypto.generatePassword(passwordGeneratorSettings!!)
             passwordInput.value = credential.password
         }
+    }
+
+    fun swapFields(from: Int, to: Int) {
+        val field = credential.fields[from]
+        credential.fields[from] = credential.fields[to]
+        credential.fields[to] = field
+    }
+
+    fun removeField(index: Int) {
+        credential.fields.removeAt(index)
     }
 }

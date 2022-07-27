@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/text_wrapper"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginTop="20dp"
-    tools:hint="Hint"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</com.google.android.material.textfield.TextInputLayout>
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:scaleY="1">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_wrapper"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@id/drag_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:hint="Hint">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/text_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ImageView
+        android:id="@+id/drag_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        app:layout_constraintBottom_toBottomOf="@id/text_wrapper"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_wrapper"
+        app:layout_constraintTop_toTopOf="@id/text_wrapper"
+        app:srcCompat="@drawable/ic_baseline_drag_indicator_24" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
