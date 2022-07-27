@@ -108,6 +108,8 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/search_bar"
                         android:text="@={viewmodel.searchText}"
+                        android:inputType="text"
+                        android:imeOptions="actionSearch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:shapeAppearanceOverlay="@style/PillButtonStyle" />
