@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="20dp"
-    android:scaleY="1">
+    android:layout_marginVertical="10dp">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/text_wrapper"
@@ -13,13 +12,14 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@id/drag_icon"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:hint="Hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/text_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <ImageView

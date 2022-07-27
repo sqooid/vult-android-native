@@ -26,13 +26,11 @@ import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
 import com.sqooid.vult.database.CredentialRepository
-import com.sqooid.vult.databinding.FieldEditBinding
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Integer.min
 import kotlin.math.max
 
 class EditCredential : Fragment() {
@@ -64,15 +62,21 @@ class EditCredential : Fragment() {
         viewModel = ViewModelProvider(this).get(CredentialViewModel::class.java)
         viewModel.credential = credential
         binding.viewmodel = viewModel
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.credRoot.layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
         }
 
         // Field edit
-        binding.fieldEditBlock.adapter = FieldEditAdapter(credential.fields)
-        binding.fieldEditBlock.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
+        binding.fieldEditBlock.adapter = FieldEditAdapter(credential.fields) { idx, value ->
+            viewModel.updateField(idx, value)
+        }
+        binding.fieldEditBlock.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+            ItemTouchHelper.LEFT
+        ) {
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
@@ -85,6 +89,7 @@ class EditCredential : Fragment() {
                 recyclerView.adapter?.notifyItemMoved(fromPos, toPos)
                 return true
             }
+
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 Log.d("app", "swiped")
                 val index = viewHolder.adapterPosition
@@ -194,9 +199,24 @@ class EditCredential : Fragment() {
 
         // Done button
         binding.fabDone.setOnClickListener {
+            if (viewModel.credential.name.isEmpty()) {
+                binding.inputCredName.error = "Name cannot be empty"
+                return@setOnClickListener
+            } else {
+                binding.inputCredName.isErrorEnabled = false
+                binding.inputCredName.error = null
+            }
+            if (viewModel.credential.password.isEmpty()) {
+                binding.passwordLayout.error = "Password cannot be empty"
+                return@setOnClickListener
+            } else {
+                binding.passwordLayout.isErrorEnabled = false
+                binding.passwordLayout.error = null
+            }
+            viewModel.cleanCredential()
             lifecycleScope.launch(Dispatchers.IO) {
                 if (isNew)
-                CredentialRepository.addCredential(requireContext(), viewModel.credential)
+                    CredentialRepository.addCredential(requireContext(), viewModel.credential)
                 else
                     CredentialRepository.updateCredential(requireContext(), viewModel.credential)
                 launch(Dispatchers.Main) {

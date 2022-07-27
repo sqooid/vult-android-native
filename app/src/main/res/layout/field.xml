@@ -8,6 +8,8 @@
     android:layout_marginTop="20dp">
 
     <TextView
+        android:textSize="12sp"
+        android:alpha="0.9"
         android:id="@+id/text_field_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

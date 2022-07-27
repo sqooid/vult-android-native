@@ -114,4 +114,14 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
     fun removeField(index: Int) {
         credential.fields.removeAt(index)
     }
+
+    fun cleanCredential() {
+        credential.fields.retainAll {
+            it.value.isNotEmpty()
+        }
+    }
+
+    fun updateField(index: Int, value: String) {
+        credential.fields[index].value = value
+    }
 }
