@@ -14,6 +14,8 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,11 +24,14 @@ import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
+import com.sqooid.vult.database.CredentialRepository
 import com.sqooid.vult.databinding.FieldEditBinding
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
 import com.sqooid.vult.util.forceRefresh
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.Exception
 
 class EditCredential : Fragment() {
@@ -137,6 +142,16 @@ class EditCredential : Fragment() {
         }
         binding.buttonGeneratePassword.setOnClickListener {
             viewModel.generatePassword()
+        }
+
+        // Done button
+        binding.fabDone.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                CredentialRepository.addCredential(requireContext(), viewModel.credential)
+                launch(Dispatchers.Main) {
+                    findNavController().navigate(EditCredentialDirections.actionCredentialToVault())
+                }
+            }
         }
     }
 

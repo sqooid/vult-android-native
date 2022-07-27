@@ -48,6 +48,9 @@
             android:name="credential"
             app:argType="com.sqooid.vult.database.Credential"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_credential_to_vault"
+            app:destination="@id/vault" />
     </fragment>
     <fragment
         android:id="@+id/vault"
