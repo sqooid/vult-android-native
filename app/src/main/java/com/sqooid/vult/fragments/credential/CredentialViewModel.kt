@@ -2,27 +2,22 @@ package com.sqooid.vult.fragments.credential
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
 import com.sqooid.vult.database.CredentialRepository
-import com.sqooid.vult.util.forceRefresh
 
 class CredentialViewModel(application: Application) : AndroidViewModel(application) {
     lateinit var credential: Credential
     var passwordGeneratorSettings: PasswordGeneratorSettings? = null
 
-    val existingTags: List<String> =
+    private val existingTags: List<String> =
         CredentialRepository.getTagsByUsage(getApplication() as Context)
 
-    val filteredExistingTags: MutableLiveData<List<String>> by lazy {
-        MutableLiveData(existingTags.filter {
-            !credential.tags.contains(it)
-        })
-    }
+    private lateinit var filteredExistingTags: ArrayList<String>
+
     val passwordInput: MutableLiveData<String> by lazy {
         MutableLiveData("")
     }
@@ -30,8 +25,12 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
         MutableLiveData("8")
     }
 
-    val addedTags: MutableLiveData<List<String>> by lazy {
-        MutableLiveData(credential.tags.toList())
+    val newAddedTags: MutableLiveData<DataUpdateInfo<String>> by lazy {
+        MutableLiveData()
+    }
+
+    val newFilteredExistingTags: MutableLiveData<DataUpdateInfo<String>> by lazy {
+        MutableLiveData()
     }
 
     var newTagValue: String = ""
@@ -42,25 +41,40 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
 
     fun addTypedTag() {
         credential.tags.add(newTagValue)
-        addedTags.value = credential.tags.toList()
+        val list = credential.tags.toList()
+        newAddedTags.value = DataUpdateInfo(list, DataChangeType.Add, list.indexOf(newTagValue))
     }
 
     fun addClickedTag(idx: Int) {
-        credential.tags.add(filteredExistingTags.value!![idx])
-        addedTags.value = credential.tags.toList()
-        filterExistingTags()
+        val newTag = filteredExistingTags[idx]
+        credential.tags.add(newTag)
+        filteredExistingTags.removeAt(idx)
+        val list = credential.tags.toList()
+        newAddedTags.value = DataUpdateInfo(list, DataChangeType.Add, list.indexOf(newTag))
+        newFilteredExistingTags.value = DataUpdateInfo(filteredExistingTags, DataChangeType.Delete, idx)
     }
 
     fun removeClickedTag(idx: Int) {
-        credential.tags.remove(addedTags.value!![idx])
-        addedTags.value = credential.tags.toList()
-        filterExistingTags()
+        val list = credential.tags.toMutableList()
+        val newTag = list[idx]
+        credential.tags.remove(newTag)
+        list.removeAt(idx)
+        newAddedTags.value = DataUpdateInfo(list, DataChangeType.Delete, idx)
+        val newFiltered = existingTags.filter {
+            !credential.tags.contains(it) && it.contains(newTagValue)
+        }
+        if (newFiltered.size > filteredExistingTags.size) {
+            newFilteredExistingTags.value = DataUpdateInfo(newFiltered, DataChangeType.Add, newFiltered.indexOf(newTag))
+            filteredExistingTags = ArrayList(newFiltered)
+        }
     }
 
     fun filterExistingTags(filter: String = "") {
-        filteredExistingTags.value = existingTags.filter {
+        val filtered = existingTags.filter {
             !credential.tags.contains(it) && it.contains(filter)
         }
+        filteredExistingTags = ArrayList(filtered)
+        newFilteredExistingTags.value = DataUpdateInfo(filtered, DataChangeType.None, -1)
     }
 
     fun increaseLength() {

@@ -44,4 +44,5 @@
     <string name="gen_def_num">generator_default_number</string>
     <string name="gen_def_sym">generator_default_symbols</string>
     <string name="search">Search</string>
+    <string name="length">Length</string>
 </resources>

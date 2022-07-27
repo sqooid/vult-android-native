@@ -1,5 +1,6 @@
 package com.sqooid.vult.fragments.credential
 
+import android.animation.LayoutTransition
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
@@ -61,6 +62,10 @@ class EditCredential : Fragment() {
         binding.viewmodel = viewModel
         binding.lifecycleOwner = this
 
+        binding.credRoot.layoutTransition = LayoutTransition().apply {
+            enableTransitionType(LayoutTransition.CHANGING)
+        }
+
         // Add field
         binding.buttonNewField.setOnClickListener {
             showAddFieldDialog()
@@ -71,19 +76,34 @@ class EditCredential : Fragment() {
         binding.existingTagsRecycler.adapter = TagAdapter(listOf()) {
             viewModel.addClickedTag(binding.existingTagsRecycler.getChildLayoutPosition(it))
         }
-        viewModel.filteredExistingTags.observe(viewLifecycleOwner) {
-            (binding.existingTagsRecycler.adapter as TagAdapter).tags = it
-            binding.existingTagsRecycler.adapter!!.notifyDataSetChanged()
+        viewModel.newFilteredExistingTags.observe(viewLifecycleOwner) {
+            Log.d("app","filtered: ${it.toString()}")
+            val adapter = binding.existingTagsRecycler.adapter
+            (adapter as TagAdapter).tags = it.newData
+            when (it.changeType) {
+                DataChangeType.Add -> adapter.notifyItemInserted(it.index)
+                DataChangeType.Delete -> adapter.notifyItemRemoved(it.index)
+                else -> adapter.notifyDataSetChanged()
+            }
+            binding.attachedTagsRecycler.scheduleLayoutAnimation()
         }
+        viewModel.filterExistingTags("")
 
         // Added tags
         binding.attachedTagsRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.attachedTagsRecycler.adapter = TagAdapter(credential.tags.toList()) {
             viewModel.removeClickedTag(binding.attachedTagsRecycler.getChildLayoutPosition(it))
         }
-        viewModel.addedTags.observe(viewLifecycleOwner) {
-            (binding.attachedTagsRecycler.adapter as TagAdapter).tags = it
-            binding.attachedTagsRecycler.adapter!!.notifyDataSetChanged()
+        viewModel.newAddedTags.observe(viewLifecycleOwner) {
+            Log.d("app","added: ${it.toString()}")
+            val adapter = binding.attachedTagsRecycler.adapter
+            (adapter as TagAdapter).tags = it.newData
+            when (it.changeType) {
+                DataChangeType.Add -> adapter.notifyItemInserted(it.index)
+                DataChangeType.Delete -> adapter.notifyItemRemoved(it.index)
+                else -> adapter.notifyDataSetChanged()
+            }
+            binding.attachedTagsRecycler.scheduleLayoutAnimation()
         }
 
         // Filter tags
