@@ -2,21 +2,24 @@ package com.sqooid.vult.fragments.vault.recyclerview
 
 import android.animation.ValueAnimator
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
-import androidx.core.view.doOnLayout
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.databinding.CredentialTileBinding
 
-class MainAdapter(var data: List<Credential>, private val recyclerView: RecyclerView): RecyclerView.Adapter<MainAdapter.ViewHolder>() {
-    class ViewHolder(val binding: CredentialTileBinding) : RecyclerView.ViewHolder(binding.root){
+class MainAdapter(
+    var data: List<Credential>,
+    private val recyclerView: RecyclerView,
+    private val onClickEdit: (Int) -> Unit
+) : RecyclerView.Adapter<MainAdapter.ViewHolder>() {
+    class ViewHolder(val binding: CredentialTileBinding) : RecyclerView.ViewHolder(binding.root) {
         var collapsedHeight = 0
         var expandedHeight = 0
         var animating = false
@@ -26,7 +29,8 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
         val binding = CredentialTileBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
 
-        binding.tagContainer.layoutManager = LinearLayoutManager(parent.context, LinearLayoutManager.HORIZONTAL, false)
+        binding.tagContainer.layoutManager =
+            LinearLayoutManager(parent.context, LinearLayoutManager.HORIZONTAL, false)
         binding.tagContainer.adapter = TagAdapter(listOf())
 
         binding.fieldContainer.layoutManager = LinearLayoutManager(parent.context)
@@ -61,7 +65,8 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
 
             if (credential.fields.size > 1) {
                 binding.fieldContainer.suppressLayout(false)
-                (binding.fieldContainer.adapter as FieldAdapter).fields = credential.fields.slice(1 until credential.fields.size)
+                (binding.fieldContainer.adapter as FieldAdapter).fields =
+                    credential.fields.slice(1 until credential.fields.size)
                 binding.fieldContainer.suppressLayout(true)
             }
             binding.fieldContainer.adapter!!.notifyDataSetChanged()
@@ -75,13 +80,28 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
         }
 
         setExpansionVisibility(false, binding)
-        holder.binding.card.measure(View.MeasureSpec.makeMeasureSpec(recyclerView.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        holder.binding.card.measure(
+            View.MeasureSpec.makeMeasureSpec(
+                recyclerView.width,
+                View.MeasureSpec.EXACTLY
+            ), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
         holder.collapsedHeight = holder.binding.card.measuredHeight
         setExpansionVisibility(true, binding)
-        holder.binding.card.measure(View.MeasureSpec.makeMeasureSpec(recyclerView.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        holder.binding.card.measure(
+            View.MeasureSpec.makeMeasureSpec(
+                recyclerView.width,
+                View.MeasureSpec.EXACTLY
+            ), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
         holder.expandedHeight = holder.binding.card.measuredHeight
+
+        Log.d("app", "expanded ${holder.expandedHeight}")
+        Log.d("app", "collapsed ${holder.collapsedHeight}")
+
         setExpansionVisibility(credential.expanded, binding)
-        holder.binding.card.layoutParams.height = if (credential.expanded) holder.expandedHeight else holder.collapsedHeight
+        holder.binding.card.layoutParams.height =
+            if (credential.expanded) holder.expandedHeight else holder.collapsedHeight
         holder.binding.card.requestLayout()
 
         binding.root.setOnClickListener {
@@ -90,6 +110,9 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
                 expandItem(holder, credential.expanded)
             }
         }
+        binding.editButton.setOnClickListener {
+            onClickEdit(position)
+        }
     }
 
     private fun setExpansionVisibility(
@@ -97,31 +120,37 @@ class MainAdapter(var data: List<Credential>, private val recyclerView: Recycler
         binding: CredentialTileBinding
     ) {
         if (expand) {
+            binding.editButton.visibility = View.VISIBLE
             binding.fieldContainer.isVisible = true
             binding.password.isVisible = true
             binding.passwordTitle.isVisible = true
         } else {
+            binding.editButton.visibility = View.INVISIBLE
             binding.fieldContainer.isVisible = false
             binding.password.isVisible = false
             binding.passwordTitle.isVisible = false
         }
     }
 
-    private fun expandItem(holder: ViewHolder, expand:Boolean) {
+    private fun expandItem(holder: ViewHolder, expand: Boolean) {
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 250
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener {
-                holder.binding.card.layoutParams.height = (holder.collapsedHeight + (holder.expandedHeight - holder.collapsedHeight) * it.animatedValue as Float).toInt()
+                holder.binding.card.layoutParams.height =
+                    (holder.collapsedHeight + (holder.expandedHeight - holder.collapsedHeight) * it.animatedValue as Float).toInt()
                 holder.binding.card.requestLayout()
             }
+            doOnStart { holder.animating = true }
+            doOnEnd { holder.animating = false }
         }
-        if (expand) animator.doOnStart { setExpansionVisibility(true, holder.binding) }
-        else animator.doOnEnd { setExpansionVisibility(false, holder.binding) }
-        animator.doOnStart { holder.animating = true }
-        animator.doOnEnd { holder.animating = false }
-        if (!expand) animator.reverse()
-        else animator.start()
+        if (expand) {
+            animator.doOnStart { setExpansionVisibility(true, holder.binding) }
+            animator.start()
+        } else {
+            animator.doOnEnd { setExpansionVisibility(false, holder.binding) }
+            animator.reverse()
+        }
     }
 
     override fun getItemCount(): Int {

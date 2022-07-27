@@ -43,10 +43,6 @@ class Vault : Fragment() {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = MainAdapter(listOf(), binding.recyclerView)
-        binding.recyclerView.adapter = adapter
-
         return binding.root
     }
 
@@ -66,6 +62,13 @@ class Vault : Fragment() {
 //                )
 //            }
         }
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        adapter = MainAdapter(listOf(), binding.recyclerView) {
+            findNavController().navigate(VaultDirections.actionVaultToCredential(adapter.data[it]))
+        }
+        binding.recyclerView.adapter = adapter
+
 
         binding.swipeDownSync.setOnRefreshListener {
             Log.d("app", "swiped down to sync")

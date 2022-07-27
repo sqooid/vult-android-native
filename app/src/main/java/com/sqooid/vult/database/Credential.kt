@@ -14,6 +14,7 @@ data class Credential(
     @ColumnInfo val fields: ArrayList<CredentialField>,
     @ColumnInfo var password: String,
 ) : Parcelable {
+    @Ignore
     @IgnoredOnParcel
     var expanded = false
 }

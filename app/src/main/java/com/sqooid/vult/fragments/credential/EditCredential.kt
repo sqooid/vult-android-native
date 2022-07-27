@@ -3,7 +3,6 @@ package com.sqooid.vult.fragments.credential
 import android.animation.LayoutTransition
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -20,7 +20,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sqooid.vult.R
-import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
@@ -29,10 +28,8 @@ import com.sqooid.vult.databinding.FieldEditBinding
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
-import com.sqooid.vult.util.forceRefresh
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.Exception
 
 class EditCredential : Fragment() {
     private var _binding: FragmentCredentialBinding? = null
@@ -41,6 +38,7 @@ class EditCredential : Fragment() {
     private lateinit var viewModel: CredentialViewModel
 
     private val args: EditCredentialArgs by navArgs()
+    private var isNew = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,18 +69,27 @@ class EditCredential : Fragment() {
             enableTransitionType(LayoutTransition.CHANGING)
         }
 
+        isNew = args.credential == null
+        if (!isNew) {
+            binding.fabDelete.isVisible = true
+            binding.fabDelete.setOnClickListener {
+                showDeleteDialog()
+            }
+        }
+
         // Add field
         binding.buttonNewField.setOnClickListener {
             showAddFieldDialog()
         }
 
         // Existing tags
-        binding.existingTagsRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.existingTagsRecycler.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.existingTagsRecycler.adapter = TagAdapter(listOf()) {
             viewModel.addClickedTag(binding.existingTagsRecycler.getChildLayoutPosition(it))
         }
         viewModel.newFilteredExistingTags.observe(viewLifecycleOwner) {
-            Log.d("app","filtered: ${it.toString()}")
+            Log.d("app", "filtered: $it")
             val adapter = binding.existingTagsRecycler.adapter
             (adapter as TagAdapter).tags = it.newData
             when (it.changeType) {
@@ -95,12 +102,13 @@ class EditCredential : Fragment() {
         viewModel.filterExistingTags("")
 
         // Added tags
-        binding.attachedTagsRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.attachedTagsRecycler.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.attachedTagsRecycler.adapter = TagAdapter(credential.tags.toList()) {
             viewModel.removeClickedTag(binding.attachedTagsRecycler.getChildLayoutPosition(it))
         }
         viewModel.newAddedTags.observe(viewLifecycleOwner) {
-            Log.d("app","added: ${it.toString()}")
+            Log.d("app", "added: $it")
             val adapter = binding.attachedTagsRecycler.adapter
             (adapter as TagAdapter).tags = it.newData
             when (it.changeType) {
@@ -129,7 +137,11 @@ class EditCredential : Fragment() {
         // Defaults
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         viewModel.passwordGeneratorSettings = PasswordGeneratorSettings(
-            try { prefs.getString(getString(R.string.gen_def_length), "8")!!.toInt() } catch (e: Exception) { 8 },
+            try {
+                prefs.getString(getString(R.string.gen_def_length), "8")!!.toInt()
+            } catch (e: Exception) {
+                8
+            },
             prefs.getBoolean(getString(R.string.gen_def_upper), true),
             prefs.getBoolean(getString(R.string.gen_def_num), true),
             prefs.getBoolean(getString(R.string.gen_def_sym), true),
@@ -147,12 +159,29 @@ class EditCredential : Fragment() {
         // Done button
         binding.fabDone.setOnClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
+                if (isNew)
                 CredentialRepository.addCredential(requireContext(), viewModel.credential)
+                else
+                    CredentialRepository.updateCredential(requireContext(), viewModel.credential)
                 launch(Dispatchers.Main) {
                     findNavController().navigate(EditCredentialDirections.actionCredentialToVault())
                 }
             }
         }
+    }
+
+    private fun showDeleteDialog() {
+        AlertDialog.Builder(requireActivity()).setTitle("Delete forever?")
+            .setPositiveButton("Delete") { _, _ ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    CredentialRepository.deleteCredential(requireContext(), viewModel.credential.id)
+                    launch(Dispatchers.Main) {
+                        findNavController().navigate(EditCredentialDirections.actionCredentialToVault())
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun addFieldInput(field: CredentialField) {
@@ -181,7 +210,11 @@ class EditCredential : Fragment() {
             }
             .setView(textInputView.root)
             .create()
-        textInputView.textInputNewField.setOnFocusChangeListener { _, b -> if (b) dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) }
+        textInputView.textInputNewField.setOnFocusChangeListener { _, b ->
+            if (b) dialog.window?.setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
+            )
+        }
         dialog.show()
         textInputView.textInputNewField.requestFocus()
     }

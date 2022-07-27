@@ -14,6 +14,9 @@ interface StoreDao {
     @Update
     fun update(cred: Credential)
 
-    @Query("select * from store where id = :id")
+    @Query("select * from Store where id = :id")
     fun getById(id: String): Credential?
+
+    @Query("delete from Store where id = :id")
+    fun deleteById(id: String)
 }

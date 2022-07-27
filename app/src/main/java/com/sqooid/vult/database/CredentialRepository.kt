@@ -51,5 +51,10 @@ class CredentialRepository {
                 }
             } while (!successful)
         }
+
+        suspend fun deleteCredential(context: Context, id: String) {
+            val dao = DatabaseManager.storeDao(context)
+            dao.deleteById(id) // note tag map is not updated because cbs...
+        }
     }
 }

@@ -19,7 +19,7 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
     private lateinit var filteredExistingTags: ArrayList<String>
 
     val passwordInput: MutableLiveData<String> by lazy {
-        MutableLiveData("")
+        MutableLiveData(credential.password)
     }
     val passwordLength: MutableLiveData<String> by lazy {
         MutableLiveData("8")
