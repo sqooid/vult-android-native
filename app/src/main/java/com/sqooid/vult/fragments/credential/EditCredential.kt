@@ -30,6 +30,7 @@ import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 class EditCredential : Fragment() {
     private var _binding: FragmentCredentialBinding? = null
@@ -151,6 +152,14 @@ class EditCredential : Fragment() {
         }
         binding.buttonRemoveLength.setOnClickListener {
             viewModel.decreaseLength()
+        }
+        viewModel.passwordLength.observe(viewLifecycleOwner) {
+            val newLength = try {
+                it.toInt()
+            } catch (e: Exception) {
+                8
+            }
+            viewModel.setPasswordLength(max(6, newLength))
         }
         binding.buttonGeneratePassword.setOnClickListener {
             viewModel.generatePassword()

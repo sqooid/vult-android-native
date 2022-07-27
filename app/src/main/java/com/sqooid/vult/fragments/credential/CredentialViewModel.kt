@@ -91,6 +91,12 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun setPasswordLength(length: Int) {
+        passwordGeneratorSettings?.let {
+            it.length = length
+        }
+    }
+
     fun generatePassword() {
         if (passwordGeneratorSettings != null) {
             credential.password = Crypto.generatePassword(passwordGeneratorSettings!!)
