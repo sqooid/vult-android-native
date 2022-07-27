@@ -13,6 +13,10 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <item name="fontFamily">@font/ibm_plex_mono_medium</item>
         <!-- Customize your theme here. -->
+        <item name="enterAnim">@anim/slide_in_from_right</item>
+        <item name="exitAnim">@anim/fade_out</item>
+        <item name="popEnterAnim">@anim/fade_in</item>
+        <item name="popExitAnim">@anim/slide_out_to_right</item>
     </style>
 
     <style name="ToolbarTheme" parent="Theme.Vult">
