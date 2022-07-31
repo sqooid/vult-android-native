@@ -11,6 +11,9 @@ interface StoreDao {
     @Insert
     fun insert(cred: Credential)
 
+    @Insert
+    fun insertBulk(credentials: List<Credential>)
+
     @Update
     fun update(cred: Credential): Int
 
@@ -19,4 +22,7 @@ interface StoreDao {
 
     @Query("delete from Store where id = :id")
     fun deleteById(id: String)
+
+    @Query("delete from Store")
+    fun clear()
 }

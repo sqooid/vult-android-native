@@ -1,6 +1,7 @@
 package com.sqooid.vult.client
 
 import android.content.Context
+import android.util.Log
 import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.auth.KeyManager
@@ -140,17 +141,39 @@ class SyncClient {
                             applyMutations(context, it)
                         }
                     }
-                    RequestResult.Success
+                    // Store
+                    if (response.store != null) {
+                        val newCredentials: List<Credential> = response.store.map {
+                            decryptCredential(context, it.value) ?: return RequestResult.Failed
+                        }
+                        val backup = storeDao.getAll().value?.toList() ?: return RequestResult.Failed
+                        storeDao.clear()
+                        runCatching {
+                            storeDao.insertBulk(newCredentials)
+                        }.onFailure {
+                            storeDao.insertBulk(backup)
+                            return RequestResult.Failed
+                        }
+                    }
+                    if (response.stateId != null) {
+                        setStateId(context, response.stateId)
+                        RequestResult.Success
+                    } else {
+                        RequestResult.Failed
+                    }
                 }
                 else -> RequestResult.Failed
             }
         }
 
+        private fun decryptCredential(context: Context, encrypted: String): Credential? {
+            val key = KeyManager.getSyncKey() ?: return null
+            return Crypto.decryptObj<Credential>(key, encrypted)
+        }
+
         fun applyMutations(context: Context, mutation: SyncMutation): Boolean {
             val storeDao = DatabaseManager.storeDao(context)
-            val key = KeyManager.getSyncKey() ?: return false
-            val credential =
-                Crypto.decryptObj<Credential>(key, mutation.credential.value) ?: return false
+            val credential = decryptCredential(context, mutation.credential.value) ?: return false
             return when (mutation.type) {
                 "add" -> {
                     storeDao.insert(credential)
@@ -182,14 +205,10 @@ class SyncClient {
         }
 
         suspend fun testStuff(context: Context) {
-//            initializeClient(ClientParams("http://192.168.0.26:8000", "test"))
-//            val result = initializeUser("somesalt")
-//            Log.d("sync", "result: $result")
-//            val salt = importUser()
-//            Log.d("sync", "salt $salt")
-            val dao = DatabaseManager.storeDao(context)
-            dao.update(Credential("noting", "", mutableSetOf(), mutableListOf(), ""))
-
+            initializeClient(ClientParams("http://192.168.0.26:8000", "test"))
+            val salt = importUser()
+            Log.d("sync", "salt $salt")
+            doSync(context)
         }
     }
 }
