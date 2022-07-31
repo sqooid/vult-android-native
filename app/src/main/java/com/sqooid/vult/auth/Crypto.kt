@@ -2,6 +2,14 @@ package com.sqooid.vult.auth
 
 import android.util.Base64
 import com.sqooid.vult.fragments.credential.PasswordGeneratorSettings
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.nio.charset.Charset
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -28,6 +36,34 @@ class Crypto {
             val cipherText = Base64.decode(split[1], Base64.NO_PADDING or Base64.NO_WRAP)
             cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
             return cipher.doFinal(cipherText).toString(Charset.defaultCharset())
+        }
+
+        inline fun <reified T> encryptObj(key: SecretKey, obj: T): String {
+            val objStr = Json.encodeToString(obj)
+
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.ENCRYPT_MODE, key)
+            val cipherBytes = cipher.doFinal(objStr.toByteArray())
+            val iv = cipher.iv
+
+            val ivText = String(Base64.encode(iv, Base64.NO_PADDING or Base64.NO_WRAP))
+            val cipherText = String(Base64.encode(cipherBytes, Base64.NO_PADDING or Base64.NO_WRAP))
+            return "$ivText:$cipherText"
+        }
+
+        inline fun <reified T> decryptObj(key: SecretKey, text: String): T? {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            val split = text.split(":")
+            val iv = Base64.decode(split[0], Base64.NO_PADDING or Base64.NO_WRAP)
+            val cipherText = Base64.decode(split[1], Base64.NO_PADDING or Base64.NO_WRAP)
+            cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
+            val clearBytes = cipher.doFinal(cipherText)
+
+            return try {
+                Json.decodeFromString<T>(clearBytes.toString(Charset.defaultCharset()))
+            } catch (e: Exception) {
+                null
+            }
         }
 
         fun generateId(bytes: Int): String {

@@ -1,6 +1,13 @@
 package com.sqooid.vult.client
 
-import android.util.Log
+import android.content.Context
+import com.sqooid.vult.Vals
+import com.sqooid.vult.auth.Crypto
+import com.sqooid.vult.auth.KeyManager
+import com.sqooid.vult.database.Credential
+import com.sqooid.vult.database.CredentialRepository
+import com.sqooid.vult.database.DatabaseManager
+import com.sqooid.vult.database.MutationType
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -14,9 +21,22 @@ class SyncClient {
     data class ClientParams(
         val host: String,
         val key: String?,
-    ) {}
+    )
+
     companion object {
         private var client: HttpClient? = null
+
+        fun getSyncEnabled(context: Context): Boolean {
+            return context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE)
+                .getBoolean(Vals.SYNC_ENABLED_KEY, false)
+        }
+
+        fun setSyncEnabled(context: Context, value: Boolean) {
+            context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().apply {
+                putBoolean(Vals.SYNC_ENABLED_KEY, value)
+                apply()
+            }
+        }
 
         fun initializeClient(params: ClientParams) {
             client = HttpClient(CIO) {
@@ -31,36 +51,145 @@ class SyncClient {
         }
 
         suspend fun importUser(): String? {
-            try {
-                val response: UserImportResponse = client?.get("user/import")?.body() ?: return null
-                return response.salt
+            return try {
+                val response: UserImportResponse? = client?.get("user/import")?.body()
+                response?.salt
             } catch (e: Exception) {
-                return null
+                null
             }
         }
 
-        suspend fun initializeUser(salt: String): InitializeUserResult {
+        suspend fun initializeUser(salt: String): RequestResult {
             try {
-                val response: InitiializeUserResponse = client?.post("user/init") {
+                val response: InitializeUserResponse = client?.post("user/init") {
                     contentType(ContentType.Application.Json)
                     setBody(InitializeUserRequest(salt))
-                }?.body() ?: return InitializeUserResult.Failed
+                }?.body() ?: return RequestResult.Failed
                 return when (response.status) {
-                    "success" -> InitializeUserResult.Success
-                    "existing" -> InitializeUserResult.Existing
-                    else -> InitializeUserResult.Failed
+                    "success" -> RequestResult.Success
+                    "existing" -> RequestResult.Conflict
+                    else -> RequestResult.Failed
                 }
             } catch (e: Exception) {
-                return InitializeUserResult.Failed
+                return RequestResult.Failed
             }
         }
 
-        suspend fun testStuff() {
-            initializeClient(ClientParams("http://192.168.0.26:8000", "test"))
-            val result = initializeUser("somesalt")
-            Log.d("sync", "result: $result")
-            val salt = importUser()
-            Log.d("sync", "salt $salt")
+        suspend fun doInitialUpload(context: Context): RequestResult {
+            val credentials =
+                CredentialRepository.getCredentials(context).value ?: return RequestResult.Failed
+            val response: InitialUploadResponse = client?.post("init/upload") {
+                contentType(ContentType.Application.Json)
+                setBody(credentials)
+            }?.body() ?: return RequestResult.Failed
+            return when (response.status) {
+                "success" -> {
+                    setStateId(context, response.stateId!!)
+                    RequestResult.Success
+                }
+                "existing" -> RequestResult.Conflict
+                else -> RequestResult.Failed
+            }
+        }
+
+        fun getEncryptedCredential(context: Context, id: String): String? {
+            val dao = DatabaseManager.storeDao(context)
+            val credential = dao.getById(id) ?: return null
+            val key = KeyManager.getSyncKey() ?: return null
+            return Crypto.encryptObj(key, credential)
+        }
+
+        suspend fun doSync(context: Context): RequestResult {
+            val cacheDao = DatabaseManager.cacheDao(context)
+            val mutations = cacheDao.getAll().map {
+                when (it.type) {
+                    MutationType.Add -> {
+                        val credStr =
+                            getEncryptedCredential(context, it.id) ?: return RequestResult.Failed
+                        SyncMutation.Add(SyncCredential(it.id, credStr))
+                    }
+                    MutationType.Modify -> {
+                        val credStr =
+                            getEncryptedCredential(context, it.id) ?: return RequestResult.Failed
+                        SyncMutation.Modify(SyncCredential(it.id, credStr))
+                    }
+                    MutationType.Delete -> SyncMutation.Delete(SyncCredential(it.id, ""))
+                }
+            }
+
+            val response: SyncResponse = client?.post("sync") {
+                contentType(ContentType.Application.Json)
+                setBody(SyncRequest(getStateId(context), mutations))
+            }?.body() ?: return RequestResult.Failed
+
+            val storeDao = DatabaseManager.storeDao(context)
+            return when (response.status) {
+                "success" -> {
+                    // Id changes
+                    if (response.idChanges != null) {
+                        response.idChanges.forEach {
+                            val changedCredential = storeDao.getById(it[0]) ?: return@forEach
+                            storeDao.deleteById(it[0])
+                            changedCredential.id = it[1]
+                            storeDao.insert(changedCredential)
+                        }
+                    }
+                    // Mutations
+                    if (response.mutations != null) {
+                        response.mutations.forEach {
+                            applyMutations(context, it)
+                        }
+                    }
+                    RequestResult.Success
+                }
+                else -> RequestResult.Failed
+            }
+        }
+
+        fun applyMutations(context: Context, mutation: SyncMutation): Boolean {
+            val storeDao = DatabaseManager.storeDao(context)
+            val key = KeyManager.getSyncKey() ?: return false
+            val credential =
+                Crypto.decryptObj<Credential>(key, mutation.credential.value) ?: return false
+            return when (mutation.type) {
+                "add" -> {
+                    storeDao.insert(credential)
+                    false
+                }
+                "modify" -> {
+                    if (storeDao.update(credential) == 0) {
+                        storeDao.insert(credential)
+                        true
+                    } else false
+                }
+                "delete" -> {
+                    storeDao.deleteById(mutation.credential.id)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        private fun setStateId(context: Context, stateId: String) {
+            KeyManager.getSecurePrefs(context).edit().apply {
+                putString(Vals.STATE_ID_KEY, stateId)
+                apply()
+            }
+        }
+
+        private fun getStateId(context: Context): String {
+            return KeyManager.getSecurePrefs(context).getString(Vals.STATE_ID_KEY, "")!!
+        }
+
+        suspend fun testStuff(context: Context) {
+//            initializeClient(ClientParams("http://192.168.0.26:8000", "test"))
+//            val result = initializeUser("somesalt")
+//            Log.d("sync", "result: $result")
+//            val salt = importUser()
+//            Log.d("sync", "salt $salt")
+            val dao = DatabaseManager.storeDao(context)
+            dao.update(Credential("noting", "", mutableSetOf(), mutableListOf(), ""))
+
         }
     }
 }

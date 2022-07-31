@@ -6,10 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Cache")
 data class Mutation(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo val time: Int,
-    @ColumnInfo val type: MutationType,
-    @ColumnInfo val id: String
+    @PrimaryKey val id: String,
+    @ColumnInfo val type: MutationType
 )
 
 enum class MutationType {

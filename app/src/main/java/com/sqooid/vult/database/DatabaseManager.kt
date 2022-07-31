@@ -32,5 +32,9 @@ class DatabaseManager {
         fun storeDao(context: Context): StoreDao {
             return getDb(context).storeDao()
         }
+
+        fun cacheDao(context: Context): MutationDao {
+            return getDb(context).cacheDao()
+        }
     }
 }

@@ -5,14 +5,14 @@ import androidx.room.*
 
 @Dao
 interface StoreDao {
-    @Query("Select * FROM Store order by name")
+    @Query("Select * FROM Store order by lower(name)")
     fun getAll(): LiveData<List<Credential>>
 
     @Insert
     fun insert(cred: Credential)
 
     @Update
-    fun update(cred: Credential)
+    fun update(cred: Credential): Int
 
     @Query("select * from Store where id = :id")
     fun getById(id: String): Credential?
