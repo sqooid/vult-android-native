@@ -83,6 +83,9 @@ class CreateAccount : Fragment() {
                         .navigate(CreateAccountDirections.actionCreateAccountToVault())
                 }
                 .show()
+        } else {
+            this.findNavController()
+                .navigate(CreateAccountDirections.actionCreateAccountToVault())
         }
     }
 }

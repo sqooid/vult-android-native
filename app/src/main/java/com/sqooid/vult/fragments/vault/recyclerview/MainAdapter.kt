@@ -96,9 +96,6 @@ class MainAdapter(
         )
         holder.expandedHeight = holder.binding.card.measuredHeight
 
-        Log.d("app", "expanded ${holder.expandedHeight}")
-        Log.d("app", "collapsed ${holder.collapsedHeight}")
-
         setExpansionVisibility(credential.expanded, binding)
         holder.binding.card.layoutParams.height =
             if (credential.expanded) holder.expandedHeight else holder.collapsedHeight

@@ -5,6 +5,7 @@ import androidx.room.*
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 @Entity(tableName = "Store")
@@ -18,6 +19,7 @@ data class Credential(
 ) : Parcelable {
     @Ignore
     @IgnoredOnParcel
+    @Transient
     var expanded = false
 }
 

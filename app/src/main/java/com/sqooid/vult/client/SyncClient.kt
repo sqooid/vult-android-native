@@ -77,8 +77,10 @@ class SyncClient {
         }
 
         suspend fun doInitialUpload(context: Context): RequestResult {
-            val credentials =
-                CredentialRepository.getCredentials(context).value ?: return RequestResult.Failed
+            val credentials: List<SyncCredential> =
+                CredentialRepository.getCredentials(context).value?.map {
+                    SyncCredential(it.id, encryptCredential(it) ?: return RequestResult.Failed)
+                } ?: return RequestResult.Failed
             val response: InitialUploadResponse = client?.post("init/upload") {
                 contentType(ContentType.Application.Json)
                 setBody(credentials)
@@ -123,9 +125,11 @@ class SyncClient {
                 setBody(SyncRequest(getStateId(context), mutations))
             }?.body() ?: return RequestResult.Failed
 
+            Log.d("app", response.toString())
             val storeDao = DatabaseManager.storeDao(context)
-            return when (response.status) {
+            when (response.status) {
                 "success" -> {
+                    Log.d("app", "successful sync request")
                     // Id changes
                     if (response.idChanges != null) {
                         response.idChanges.forEach {
@@ -144,36 +148,54 @@ class SyncClient {
                     // Store
                     if (response.store != null) {
                         val newCredentials: List<Credential> = response.store.map {
-                            decryptCredential(context, it.value) ?: return RequestResult.Failed
+                            decryptCredential(it.value) ?: return RequestResult.Failed
                         }
-                        val backup = storeDao.getAll().value?.toList() ?: return RequestResult.Failed
+                        val backup =
+                            storeDao.getAllStatic() ?: return RequestResult.Failed
+                        Log.d("app", "backed up store")
                         storeDao.clear()
                         runCatching {
                             storeDao.insertBulk(newCredentials)
                         }.onFailure {
                             storeDao.insertBulk(backup)
+                            Log.d("app", "failed to bulk insert remote store")
                             return RequestResult.Failed
                         }
                     }
-                    if (response.stateId != null) {
+                    return if (response.stateId != null) {
                         setStateId(context, response.stateId)
+                        cacheDao.clear()
                         RequestResult.Success
                     } else {
+                        Log.d("app", "missing state id")
                         RequestResult.Failed
                     }
                 }
-                else -> RequestResult.Failed
+                else -> return RequestResult.Failed
             }
         }
 
-        private fun decryptCredential(context: Context, encrypted: String): Credential? {
+        private fun decryptCredential(encrypted: String): Credential? {
             val key = KeyManager.getSyncKey() ?: return null
-            return Crypto.decryptObj<Credential>(key, encrypted)
+            val decrypted = Crypto.decryptObj<Credential>(key, encrypted)
+            if (decrypted == null) {
+                Log.d("app", "failed to decrypt $encrypted")
+            }
+            return decrypted
+        }
+
+        private fun encryptCredential(credential: Credential): String? {
+            val key = KeyManager.getSyncKey() ?: return null
+            val encrypted = Crypto.encryptObj(key, credential)
+            if (encrypted == null) {
+                Log.d("app", "failed to encrypt $encrypted")
+            }
+            return encrypted
         }
 
         fun applyMutations(context: Context, mutation: SyncMutation): Boolean {
             val storeDao = DatabaseManager.storeDao(context)
-            val credential = decryptCredential(context, mutation.credential.value) ?: return false
+            val credential = decryptCredential(mutation.credential.value) ?: return false
             return when (mutation.type) {
                 "add" -> {
                     storeDao.insert(credential)
@@ -206,9 +228,30 @@ class SyncClient {
 
         suspend fun testStuff(context: Context) {
             initializeClient(ClientParams("http://192.168.0.26:8000", "test"))
+            KeyManager.createSyncKey(context, "aaaaaA1!", "somesalt".toByteArray())
+            test1(context)
+        }
+
+        suspend fun test2(context: Context) {
+            initializeUser("somesalt")
+            CredentialRepository.addCredential(
+                context, Credential(
+                    "some", "", mutableSetOf(),
+                    mutableListOf(), ""
+                )
+            )
+            Thread.sleep(1000)
+            Log.d("app", doInitialUpload(context).toString())
+            setSyncEnabled(context, true)
+            CredentialRepository.addCredential(
+                context, Credential("another", "", mutableSetOf(), mutableListOf(),"")
+            )
+            Log.d("app", doSync(context).toString())
+        }
+
+        suspend fun test1(context: Context) {
             val salt = importUser()
-            Log.d("sync", "salt $salt")
-            doSync(context)
+            Log.d("app", doSync(context).toString())
         }
     }
 }

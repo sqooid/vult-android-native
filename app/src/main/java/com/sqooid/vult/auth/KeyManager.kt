@@ -61,11 +61,17 @@ class KeyManager {
                 Charset.defaultCharset()
             )
 
+            context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().apply {
+                putString(Vals.SYNC_SALT_KEY, saltString)
+                apply()
+            }
+        }
+
+        fun createHash(context: Context, seed: String) {
             // Do bcrypt hash
             val hash = BCrypt.hashpw(seed, BCrypt.gensalt())
 
             context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().apply {
-                putString(Vals.SYNC_SALT_KEY, saltString)
                 putString(Vals.HASH_KEY, hash)
                 apply()
             }

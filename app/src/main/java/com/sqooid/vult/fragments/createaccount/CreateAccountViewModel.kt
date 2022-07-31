@@ -19,10 +19,9 @@ class CreateAccountViewModel(application: Application) : AndroidViewModel(applic
 
     fun createAccount(context: Context) {
         passwordTooShort.value = PasswordValidator.validate(masterPassword)
-        if (passwordTooShort.value != PasswordValidator.PasswordWeakness.None) {
-            return
+        if (passwordTooShort.value == PasswordValidator.PasswordWeakness.None) {
+            KeyManager.createHash(context, masterPassword)
         }
-        KeyManager.createSyncKey(context, masterPassword)
     }
 
     fun createDataKey() {

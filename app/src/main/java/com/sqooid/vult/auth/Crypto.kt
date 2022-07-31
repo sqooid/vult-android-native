@@ -38,17 +38,22 @@ class Crypto {
             return cipher.doFinal(cipherText).toString(Charset.defaultCharset())
         }
 
-        inline fun <reified T> encryptObj(key: SecretKey, obj: T): String {
-            val objStr = Json.encodeToString(obj)
+        inline fun <reified T> encryptObj(key: SecretKey, obj: T): String? {
+            return try {
+                val objStr = Json.encodeToString(obj)
 
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.ENCRYPT_MODE, key)
-            val cipherBytes = cipher.doFinal(objStr.toByteArray())
-            val iv = cipher.iv
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                cipher.init(Cipher.ENCRYPT_MODE, key)
+                val cipherBytes = cipher.doFinal(objStr.toByteArray())
+                val iv = cipher.iv
 
-            val ivText = String(Base64.encode(iv, Base64.NO_PADDING or Base64.NO_WRAP))
-            val cipherText = String(Base64.encode(cipherBytes, Base64.NO_PADDING or Base64.NO_WRAP))
-            return "$ivText:$cipherText"
+                val ivText = String(Base64.encode(iv, Base64.NO_PADDING or Base64.NO_WRAP))
+                val cipherText =
+                    String(Base64.encode(cipherBytes, Base64.NO_PADDING or Base64.NO_WRAP))
+                "$ivText:$cipherText"
+            } catch (e: Exception) {
+                null
+            }
         }
 
         inline fun <reified T> decryptObj(key: SecretKey, text: String): T? {
