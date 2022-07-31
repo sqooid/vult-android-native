@@ -25,7 +25,7 @@
         <SwitchPreferenceCompat
             app:defaultValue="true"
             app:key="@string/gen_def_num"
-            app:title="Use number" />
+            app:title="Use numbers" />
         <SwitchPreferenceCompat
             app:defaultValue="true"
             app:key="@string/gen_def_sym"
