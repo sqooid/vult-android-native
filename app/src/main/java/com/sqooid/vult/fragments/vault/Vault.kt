@@ -14,11 +14,15 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.sqooid.vult.client.SyncClient
 import com.sqooid.vult.databinding.FragmentVaultBinding
 import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -74,7 +78,9 @@ class Vault : Fragment() {
 
 
         binding.swipeDownSync.setOnRefreshListener {
-            Log.d("app", "swiped down to sync")
+            lifecycleScope.launch(Dispatchers.IO) {
+                SyncClient.testStuff()
+            }
             binding.swipeDownSync.isRefreshing = false
         }
 

@@ -5,12 +5,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.sqooid.vult.auth.Crypto
 import net.sqlcipher.database.SQLiteConstraintException
-import java.lang.Exception
 
 class CredentialRepository {
     companion object {
         private var credentialList: LiveData<List<Credential>>? = null
-        private var tagList: MutableMap<String, Int>? = null
+        private var tagMap: MutableMap<String, Int> = mutableMapOf()
+        private var tagMapInitialized = false
 
         fun getCredentials(context: Context): LiveData<List<Credential>> {
             if (credentialList == null) {
@@ -20,16 +20,16 @@ class CredentialRepository {
         }
 
         fun getTagsByUsage(context: Context): List<String> {
-            if (tagList == null) {
-                tagList = mutableMapOf()
+            if (!tagMapInitialized) {
                 for (credential in getCredentials(context).value!!) {
                     for (tag in credential.tags) {
-                        tagList!![tag] = tagList!!.getOrDefault(tag, 0) + 1
+                        tagMap[tag] = tagMap.getOrDefault(tag, 0) + 1
                     }
                 }
+                tagMapInitialized = true
             }
-            return tagList!!.iterator().asSequence().sortedBy {
-                it.value
+            return tagMap.iterator().asSequence().sortedBy {
+                -it.value
             }.map { it.key }.toList()
         }
 
@@ -45,6 +45,9 @@ class CredentialRepository {
                 try {
                     dao.insert(credential)
                     successful = true
+                    for (tag in credential.tags) {
+                        tagMap[tag] = tagMap.getOrDefault(tag, 0) + 1
+                    }
                 } catch (e: SQLiteConstraintException) {
                     Log.d("app", e.toString())
                     credential.id = Crypto.generateId(24)

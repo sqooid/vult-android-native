@@ -25,11 +25,11 @@ class Converters {
         return Json.decodeFromString(str)
     }
     @TypeConverter
-    fun listCredFieldToString(list: ArrayList<CredentialField>): String {
+    fun listCredFieldToString(list: MutableList<CredentialField>): String {
         return Json.encodeToString(list)
     }
     @TypeConverter
-    fun stringToListCredField(str: String): ArrayList<CredentialField> {
+    fun stringToListCredField(str: String): MutableList<CredentialField> {
         return Json.decodeFromString(str)
     }
     @TypeConverter

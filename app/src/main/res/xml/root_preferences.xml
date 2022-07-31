@@ -33,4 +33,9 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="Import and export" app:iconSpaceReserved="false">
+        <Preference app:title="Import raw file" app:key="@string/import_raw" />
+        <Preference app:title="Export raw file" app:key="@string/export_raw" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

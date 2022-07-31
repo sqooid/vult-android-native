@@ -1,5 +1,6 @@
 package com.sqooid.vult.client
 
+import android.util.Log
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -24,26 +25,42 @@ class SyncClient {
                 }
                 defaultRequest {
                     url(params.host)
-                    header("Authorization", params.key)
+                    header("Authentication", params.key)
                 }
             }
         }
 
         suspend fun importUser(): String? {
-            val response: UserImportResponse = client?.get("user/import")?.body() ?: return null
-            return response.salt
+            try {
+                val response: UserImportResponse = client?.get("user/import")?.body() ?: return null
+                return response.salt
+            } catch (e: Exception) {
+                return null
+            }
         }
 
         suspend fun initializeUser(salt: String): InitializeUserResult {
-            val response: InitiializeUserResponse = client?.post("user/init") {
-                contentType(ContentType.Application.Json)
-                setBody(InitializeUserRequest(salt))
-            }?.body() ?: return InitializeUserResult.Failed
-            return when(response.status) {
-                "success" -> InitializeUserResult.Success
-                "existing" -> InitializeUserResult.Existing
-                else -> InitializeUserResult.Failed
+            try {
+                val response: InitiializeUserResponse = client?.post("user/init") {
+                    contentType(ContentType.Application.Json)
+                    setBody(InitializeUserRequest(salt))
+                }?.body() ?: return InitializeUserResult.Failed
+                return when (response.status) {
+                    "success" -> InitializeUserResult.Success
+                    "existing" -> InitializeUserResult.Existing
+                    else -> InitializeUserResult.Failed
+                }
+            } catch (e: Exception) {
+                return InitializeUserResult.Failed
             }
+        }
+
+        suspend fun testStuff() {
+            initializeClient(ClientParams("http://192.168.0.26:8000", "test"))
+            val result = initializeUser("somesalt")
+            Log.d("sync", "result: $result")
+            val salt = importUser()
+            Log.d("sync", "salt $salt")
         }
     }
 }

@@ -45,4 +45,6 @@
     <string name="gen_def_sym">generator_default_symbols</string>
     <string name="search">Search</string>
     <string name="length">Length</string>
+    <string name="import_raw">pref_import</string>
+    <string name="export_raw">pref_export</string>
 </resources>
