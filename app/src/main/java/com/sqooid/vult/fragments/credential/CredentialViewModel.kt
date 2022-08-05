@@ -1,20 +1,23 @@
 package com.sqooid.vult.fragments.credential
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.database.CredentialRepository
+import com.sqooid.vult.repository.CredentialRepository
+import com.sqooid.vult.repository.Repository
+import javax.inject.Inject
 
 class CredentialViewModel(application: Application) : AndroidViewModel(application) {
+    @Inject
+    lateinit var repository: CredentialRepository
     lateinit var credential: Credential
     var passwordGeneratorSettings: PasswordGeneratorSettings? = null
 
     private val existingTags: List<String> =
-        CredentialRepository.getTagsByUsage(getApplication() as Context)
+        repository.getTagsByUsage()
 
     private lateinit var filteredExistingTags: ArrayList<String>
 
@@ -52,7 +55,8 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
         filteredExistingTags.removeAt(idx)
         val list = credential.tags.toList()
         newAddedTags.value = DataUpdateInfo(list, DataChangeType.Add, list.indexOf(newTag))
-        newFilteredExistingTags.value = DataUpdateInfo(filteredExistingTags, DataChangeType.Delete, idx)
+        newFilteredExistingTags.value =
+            DataUpdateInfo(filteredExistingTags, DataChangeType.Delete, idx)
     }
 
     fun removeClickedTag(idx: Int) {
@@ -65,7 +69,8 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
             !credential.tags.contains(it) && it.contains(newTagValue)
         }
         if (newFiltered.size > filteredExistingTags.size) {
-            newFilteredExistingTags.value = DataUpdateInfo(newFiltered, DataChangeType.Add, newFiltered.indexOf(newTag))
+            newFilteredExistingTags.value =
+                DataUpdateInfo(newFiltered, DataChangeType.Add, newFiltered.indexOf(newTag))
             filteredExistingTags = ArrayList(newFiltered)
         }
     }
@@ -123,5 +128,16 @@ class CredentialViewModel(application: Application) : AndroidViewModel(applicati
 
     fun updateField(index: Int, value: String) {
         credential.fields[index].value = value
+    }
+
+    suspend fun saveCredential(new: Boolean) {
+        if (new)
+            repository.addCredential(credential)
+        else
+            repository.updateCredential(credential)
+    }
+
+    suspend fun deleteCredential() {
+        repository.deleteCredential(credential.id)
     }
 }

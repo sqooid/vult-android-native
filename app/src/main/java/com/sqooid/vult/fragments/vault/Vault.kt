@@ -79,7 +79,7 @@ class Vault : Fragment() {
 
         binding.swipeDownSync.setOnRefreshListener {
             lifecycleScope.launch(Dispatchers.IO) {
-                SyncClient.testStuff(requireContext())
+//                SyncClient.testStuff(requireContext())
             }
             binding.swipeDownSync.isRefreshing = false
         }

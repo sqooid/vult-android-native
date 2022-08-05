@@ -25,7 +25,7 @@ import com.sqooid.vult.R
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.database.CredentialRepository
+import com.sqooid.vult.repository.Repository
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
@@ -215,10 +215,7 @@ class EditCredential : Fragment() {
             }
             viewModel.cleanCredential()
             lifecycleScope.launch(Dispatchers.IO) {
-                if (isNew)
-                    CredentialRepository.addCredential(requireContext(), viewModel.credential)
-                else
-                    CredentialRepository.updateCredential(requireContext(), viewModel.credential)
+                viewModel.saveCredential(isNew)
                 launch(Dispatchers.Main) {
                     findNavController().navigate(EditCredentialDirections.actionCredentialToVault())
                 }
@@ -230,7 +227,7 @@ class EditCredential : Fragment() {
         AlertDialog.Builder(requireActivity()).setTitle("Delete forever?")
             .setPositiveButton("Delete") { _, _ ->
                 lifecycleScope.launch(Dispatchers.IO) {
-                    CredentialRepository.deleteCredential(requireContext(), viewModel.credential.id)
+                    viewModel.deleteCredential()
                     launch(Dispatchers.Main) {
                         findNavController().navigate(EditCredentialDirections.actionCredentialToVault())
                     }

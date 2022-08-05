@@ -12,8 +12,11 @@ import androidx.preference.PreferenceFragmentCompat
 import com.sqooid.vult.rawimport.RawData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class Settings : PreferenceFragmentCompat() {
+class Settings @Inject constructor(
+    private val rawData: RawData
+) : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
@@ -23,7 +26,7 @@ class Settings : PreferenceFragmentCompat() {
             if (uri == null) return@registerForActivityResult
             lifecycleScope.launch(Dispatchers.IO) {
                 runCatching {
-                    RawData.importFromUri(requireContext(), uri)
+                    rawData.importFromUri(uri)
                 }.onFailure {
                     launch(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "Failed to import", Toast.LENGTH_SHORT).show()
@@ -43,7 +46,7 @@ class Settings : PreferenceFragmentCompat() {
             if (uri == null) return@registerForActivityResult
             lifecycleScope.launch(Dispatchers.IO) {
                 runCatching {
-                    RawData.exportToUri(requireContext(), uri)
+                    rawData.exportToUri(uri)
                 }.onFailure {
                     launch(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "Failed to export", Toast.LENGTH_SHORT).show()

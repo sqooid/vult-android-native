@@ -5,17 +5,35 @@ import android.net.Uri
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.database.CredentialRepository
+import com.sqooid.vult.repository.CredentialRepository
+import com.sqooid.vult.repository.Repository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.FragmentComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import javax.inject.Inject
 
-class RawData {
-    companion object {
-        suspend fun importFromUri(context: Context, uri: Uri) {
+@Module
+@InstallIn(FragmentComponent::class)
+abstract class RawDataModule {
+    @Binds
+    abstract fun bindRawData(
+        rawData: RawData
+    ): RawData
+}
+
+class RawData @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val repository: CredentialRepository
+) {
+        suspend fun importFromUri(uri: Uri) {
             val resolver = context.contentResolver
             val builder = StringBuilder()
             resolver.openInputStream(uri)?.use { inputStream ->
@@ -60,17 +78,17 @@ class RawData {
             }
 
             for (credential in importedCredentials) {
-                CredentialRepository.addCredential(context, credential)
+                repository.addCredential( credential)
             }
         }
 
         private val json = Json { prettyPrint = true }
 
-        suspend fun exportToUri(context: Context, uri: Uri) {
+        suspend fun exportToUri(uri: Uri) {
             val resolver = context.contentResolver
 
             val credentialString = json.encodeToString(
-                CredentialRepository.getCredentials(context).value
+                repository.getCredentialsStatic()
             )
 
             resolver.openOutputStream(uri).use { outputStream ->
@@ -79,5 +97,4 @@ class RawData {
                 }
             }
         }
-    }
 }

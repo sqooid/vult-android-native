@@ -8,7 +8,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-@Database(entities = [Credential::class, Mutation::class], version = 1)
+@Database(entities = [Credential::class, Mutation::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class Database : RoomDatabase() {
     abstract fun storeDao(): StoreDao

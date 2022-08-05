@@ -9,7 +9,7 @@ interface StoreDao {
     fun getAll(): LiveData<List<Credential>>
 
     @Query("select * from Store")
-    fun getAllStatic(): List<Credential>?
+    fun getAllStatic(): List<Credential>
 
     @Insert
     fun insert(cred: Credential)
