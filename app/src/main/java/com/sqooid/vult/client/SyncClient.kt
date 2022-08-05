@@ -21,10 +21,23 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import javax.inject.Inject
 
+interface SyncClientInterface {
+    fun getSyncEnabled(): Boolean
+    fun setSyncEnabled(value: Boolean)
+
+    suspend fun importUser(): String?
+
+    suspend fun initializeUser(salt: String): RequestResult
+
+    suspend fun doInitialUpload(repository: CredentialRepository): RequestResult
+
+    suspend fun doSync(repository: CredentialRepository,context: Context): RequestResult
+}
+
 class SyncClient @Inject constructor(
     @ApplicationContext val context: Context,
-    val repository: CredentialRepository
-) {
+) : SyncClientInterface {
+
     data class ClientParams(
         val host: String,
         val key: String?,
@@ -32,12 +45,12 @@ class SyncClient @Inject constructor(
 
     private var client: HttpClient? = null
 
-    fun getSyncEnabled(): Boolean {
+    override fun getSyncEnabled(): Boolean {
         return context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE)
             .getBoolean(Vals.SYNC_ENABLED_KEY, false)
     }
 
-    fun setSyncEnabled( value: Boolean) {
+    override fun setSyncEnabled(value: Boolean) {
         context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().apply {
             putBoolean(Vals.SYNC_ENABLED_KEY, value)
             apply()
@@ -56,7 +69,7 @@ class SyncClient @Inject constructor(
         }
     }
 
-    suspend fun importUser(): String? {
+    override suspend fun importUser(): String? {
         return try {
             val response: UserImportResponse? = client?.get("user/import")?.body()
             response?.salt
@@ -65,7 +78,7 @@ class SyncClient @Inject constructor(
         }
     }
 
-    suspend fun initializeUser(salt: String): RequestResult {
+    override suspend fun initializeUser(salt: String): RequestResult {
         try {
             val response: InitializeUserResponse = client?.post("user/init") {
                 contentType(ContentType.Application.Json)
@@ -81,7 +94,7 @@ class SyncClient @Inject constructor(
         }
     }
 
-    suspend fun doInitialUpload(): RequestResult {
+    override suspend fun doInitialUpload(repository: CredentialRepository): RequestResult {
         val credentials: List<SyncCredential> =
             repository.getCredentialsLive().value?.map {
                 SyncCredential(it.id, encryptCredential(it) ?: return RequestResult.Failed)
@@ -100,23 +113,23 @@ class SyncClient @Inject constructor(
         }
     }
 
-    suspend fun getEncryptedCredential( id: String): String? {
+    private suspend fun getEncryptedCredential(repository: CredentialRepository,id: String): String? {
         val credential = repository.getCredentialById(id) ?: return null
         val key = KeyManager.getSyncKey() ?: return null
         return Crypto.encryptObj(key, credential)
     }
 
-    suspend fun doSync(context: Context): RequestResult {
+    override suspend fun doSync(repository: CredentialRepository, context: Context): RequestResult {
         val mutations = repository.getCache().map {
             when (it.type) {
                 MutationType.Add -> {
                     val credStr =
-                        getEncryptedCredential( it.id) ?: return RequestResult.Failed
+                        getEncryptedCredential(repository, it.id) ?: return RequestResult.Failed
                     SyncMutation.Add(SyncCredential(it.id, credStr))
                 }
                 MutationType.Modify -> {
                     val credStr =
-                        getEncryptedCredential( it.id) ?: return RequestResult.Failed
+                        getEncryptedCredential(repository, it.id) ?: return RequestResult.Failed
                     SyncMutation.Modify(SyncCredential(it.id, credStr))
                 }
                 MutationType.Delete -> SyncMutation.Delete(SyncCredential(it.id, ""))
@@ -144,7 +157,7 @@ class SyncClient @Inject constructor(
                 // Mutations
                 if (response.mutations != null) {
                     response.mutations.forEach {
-                        applyMutations(it)
+                        applyMutations(repository, it)
                     }
                 }
                 // Store
@@ -195,7 +208,7 @@ class SyncClient @Inject constructor(
         return encrypted
     }
 
-    suspend fun applyMutations(mutation: SyncMutation): Boolean {
+    private suspend fun applyMutations(repository: CredentialRepository, mutation: SyncMutation): Boolean {
         val credential = decryptCredential(mutation.credential.value) ?: return false
         return when (mutation.type) {
             "add" -> {

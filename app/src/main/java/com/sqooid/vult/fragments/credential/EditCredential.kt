@@ -29,10 +29,12 @@ import com.sqooid.vult.repository.Repository
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
+@AndroidEntryPoint
 class EditCredential : Fragment() {
     private var _binding: FragmentCredentialBinding? = null
     private val binding get() = _binding!!

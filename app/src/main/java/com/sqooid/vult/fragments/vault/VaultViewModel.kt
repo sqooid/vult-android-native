@@ -1,15 +1,17 @@
 package com.sqooid.vult.fragments.vault
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.repository.CredentialRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-class VaultViewModel(application: Application) : AndroidViewModel(application) {
-    @Inject lateinit var repository: CredentialRepository
+@HiltViewModel
+class VaultViewModel @Inject constructor(
+    val repository: CredentialRepository
+) : ViewModel() {
 
     val credentialList: LiveData<List<Credential>> =
         repository.getCredentialsLive()

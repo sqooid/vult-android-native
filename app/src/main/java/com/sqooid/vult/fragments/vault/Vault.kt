@@ -21,11 +21,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sqooid.vult.client.SyncClient
 import com.sqooid.vult.databinding.FragmentVaultBinding
 import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
+@AndroidEntryPoint
 class Vault : Fragment() {
     private var _binding: FragmentVaultBinding? = null
     private val binding get() = _binding!!

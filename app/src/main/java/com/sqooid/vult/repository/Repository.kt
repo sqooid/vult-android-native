@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.client.SyncClient
+import com.sqooid.vult.client.SyncClientInterface
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.DatabaseInterface
 import com.sqooid.vult.database.Mutation
@@ -20,8 +21,9 @@ import javax.inject.Singleton
 class Repository @Inject constructor(
     @ApplicationContext val context: Context,
     private val databaseManager: DatabaseInterface,
-    private val syncClient: SyncClient
+    private val syncClient: SyncClientInterface
 ): CredentialRepository {
+
     private var credentialList: LiveData<List<Credential>>? = null
     private var tagMap: MutableMap<String, Int> = mutableMapOf()
     private var tagMapInitialized = false
