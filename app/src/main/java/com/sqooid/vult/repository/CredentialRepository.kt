@@ -11,17 +11,11 @@ interface CredentialRepository {
 
     fun getTagsByUsage(): List<String>
 
-    suspend fun updateCredential(
-        credential: Credential,
-        cached: Boolean = true
-    ): Int
+    suspend fun updateCredential(credential: Credential): Int
 
-    suspend fun addCredential(
-        credential: Credential,
-        cached: Boolean = true
-    )
+    suspend fun addCredential(credential: Credential)
 
-    suspend fun deleteCredential(id: String, cached: Boolean = false)
+    suspend fun deleteCredential(id: String)
 
     suspend fun getCredentialById(id: String): Credential?
 

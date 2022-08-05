@@ -6,10 +6,8 @@ import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.auth.KeyManager
 import com.sqooid.vult.database.Credential
-import com.sqooid.vult.database.DatabaseManager
+import com.sqooid.vult.database.DatabaseInterface
 import com.sqooid.vult.database.MutationType
-import com.sqooid.vult.repository.CredentialRepository
-import com.sqooid.vult.repository.Repository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -29,13 +27,14 @@ interface SyncClientInterface {
 
     suspend fun initializeUser(salt: String): RequestResult
 
-    suspend fun doInitialUpload(repository: CredentialRepository): RequestResult
+    suspend fun doInitialUpload(): RequestResult
 
-    suspend fun doSync(repository: CredentialRepository,context: Context): RequestResult
+    suspend fun doSync(context: Context): RequestResult
 }
 
 class SyncClient @Inject constructor(
     @ApplicationContext val context: Context,
+    private val databaseManager: DatabaseInterface,
 ) : SyncClientInterface {
 
     data class ClientParams(
@@ -94,11 +93,12 @@ class SyncClient @Inject constructor(
         }
     }
 
-    override suspend fun doInitialUpload(repository: CredentialRepository): RequestResult {
+    override suspend fun doInitialUpload(): RequestResult {
+        val storeDao = databaseManager.storeDao()
         val credentials: List<SyncCredential> =
-            repository.getCredentialsLive().value?.map {
+            storeDao.getAllStatic().map {
                 SyncCredential(it.id, encryptCredential(it) ?: return RequestResult.Failed)
-            } ?: return RequestResult.Failed
+            }
         val response: InitialUploadResponse = client?.post("init/upload") {
             contentType(ContentType.Application.Json)
             setBody(credentials)
@@ -113,23 +113,26 @@ class SyncClient @Inject constructor(
         }
     }
 
-    private suspend fun getEncryptedCredential(repository: CredentialRepository,id: String): String? {
-        val credential = repository.getCredentialById(id) ?: return null
+    private fun getEncryptedCredential(id: String): String? {
+        val storeDao = databaseManager.storeDao()
+        val credential = storeDao.getById(id) ?: return null
         val key = KeyManager.getSyncKey() ?: return null
         return Crypto.encryptObj(key, credential)
     }
 
-    override suspend fun doSync(repository: CredentialRepository, context: Context): RequestResult {
-        val mutations = repository.getCache().map {
+    override suspend fun doSync(context: Context): RequestResult {
+        val cacheDao = databaseManager.cacheDao()
+        val storeDao = databaseManager.storeDao()
+        val mutations = cacheDao.getAll().map {
             when (it.type) {
                 MutationType.Add -> {
                     val credStr =
-                        getEncryptedCredential(repository, it.id) ?: return RequestResult.Failed
+                        getEncryptedCredential(it.id) ?: return RequestResult.Failed
                     SyncMutation.Add(SyncCredential(it.id, credStr))
                 }
                 MutationType.Modify -> {
                     val credStr =
-                        getEncryptedCredential(repository, it.id) ?: return RequestResult.Failed
+                        getEncryptedCredential(it.id) ?: return RequestResult.Failed
                     SyncMutation.Modify(SyncCredential(it.id, credStr))
                 }
                 MutationType.Delete -> SyncMutation.Delete(SyncCredential(it.id, ""))
@@ -148,16 +151,17 @@ class SyncClient @Inject constructor(
                 // Id changes
                 if (response.idChanges != null) {
                     response.idChanges.forEach {
-                        val changedCredential = repository.getCredentialById(it[0]) ?: return@forEach
-                        repository.deleteCredential(it[0], false)
+                        val changedCredential =
+                            storeDao.getById(it[0]) ?: return@forEach
+                        storeDao.deleteById(it[0])
                         changedCredential.id = it[1]
-                        repository.addCredential(changedCredential, false)
+                        storeDao.insert(changedCredential)
                     }
                 }
                 // Mutations
                 if (response.mutations != null) {
                     response.mutations.forEach {
-                        applyMutations(repository, it)
+                        applyMutations(it)
                     }
                 }
                 // Store
@@ -166,20 +170,20 @@ class SyncClient @Inject constructor(
                         decryptCredential(it.value) ?: return RequestResult.Failed
                     }
                     val backup =
-                        repository.getCredentialsStatic()
+                        storeDao.getAllStatic()
                     Log.d("app", "backed up store")
-                    repository.deleteAllCredentials()
+                    storeDao.clear()
                     runCatching {
-                        repository.addCredentialBulk(newCredentials)
+                        storeDao.insertBulk(newCredentials)
                     }.onFailure {
-                        repository.addCredentialBulk(backup)
+                        storeDao.insertBulk(backup)
                         Log.d("app", "failed to bulk insert remote store")
                         return RequestResult.Failed
                     }
                 }
                 return if (response.stateId != null) {
                     setStateId(context, response.stateId)
-                    repository.clearCache()
+                    storeDao.clear()
                     RequestResult.Success
                 } else {
                     Log.d("app", "missing state id")
@@ -208,21 +212,22 @@ class SyncClient @Inject constructor(
         return encrypted
     }
 
-    private suspend fun applyMutations(repository: CredentialRepository, mutation: SyncMutation): Boolean {
+    private fun applyMutations(mutation: SyncMutation): Boolean {
+        val storeDao = databaseManager.storeDao()
         val credential = decryptCredential(mutation.credential.value) ?: return false
         return when (mutation.type) {
             "add" -> {
-                repository.addCredential(credential, false)
+                storeDao.insert(credential)
                 false
             }
             "modify" -> {
-                if (repository.updateCredential(credential, false) == 0) {
-                    repository.addCredential(credential, false)
+                if (storeDao.update(credential) == 0) {
+                    storeDao.insert(credential)
                     true
                 } else false
             }
             "delete" -> {
-                repository.deleteCredential(mutation.credential.id, false)
+                storeDao.deleteById(mutation.credential.id)
                 true
             }
             else -> false

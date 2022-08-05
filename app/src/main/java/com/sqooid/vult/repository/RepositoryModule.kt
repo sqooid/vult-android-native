@@ -2,6 +2,7 @@ package com.sqooid.vult.repository
 
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -14,4 +15,5 @@ abstract class RepositoryModule {
     abstract fun bindRepository(
         repository: Repository
     ): CredentialRepository
+
 }

@@ -4,25 +4,20 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import com.sqooid.vult.auth.Crypto
-import com.sqooid.vult.client.SyncClient
 import com.sqooid.vult.client.SyncClientInterface
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.DatabaseInterface
 import com.sqooid.vult.database.Mutation
 import com.sqooid.vult.database.MutationType
-import dagger.Module
-import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import net.sqlcipher.database.SQLiteConstraintException
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class Repository @Inject constructor(
     @ApplicationContext val context: Context,
     private val databaseManager: DatabaseInterface,
     private val syncClient: SyncClientInterface
-): CredentialRepository {
+) : CredentialRepository {
 
     private var credentialList: LiveData<List<Credential>>? = null
     private var tagMap: MutableMap<String, Int> = mutableMapOf()
@@ -54,15 +49,12 @@ class Repository @Inject constructor(
         }.map { it.key }.toList()
     }
 
-    override suspend fun updateCredential(
-        credential: Credential,
-        cached: Boolean
-    ): Int {
+    override suspend fun updateCredential(credential: Credential): Int {
         val dao = databaseManager.storeDao()
         val result = dao.update(credential)
 
         // Cache - turn into add mutation if add already there
-        if (syncClient.getSyncEnabled() && cached) {
+        if (syncClient.getSyncEnabled()) {
             val cacheDao = databaseManager.cacheDao()
             if (cacheDao.getById(credential.id) != null) {
                 cacheDao.update(Mutation(credential.id, MutationType.Add))
@@ -73,10 +65,7 @@ class Repository @Inject constructor(
         return result
     }
 
-    override suspend fun addCredential(
-        credential: Credential,
-        cached: Boolean
-    ) {
+    override suspend fun addCredential(credential: Credential) {
         val dao = databaseManager.storeDao()
         var successful = false
         do {
@@ -87,7 +76,7 @@ class Repository @Inject constructor(
                     tagMap[tag] = tagMap.getOrDefault(tag, 0) + 1
                 }
                 // Cache - convert earlier deletes into updates
-                if (syncClient.getSyncEnabled() && cached) {
+                if (syncClient.getSyncEnabled()) {
                     val cacheDao = databaseManager.cacheDao()
                     if (cacheDao.getById(credential.id) != null) {
                         cacheDao.update(Mutation(credential.id, MutationType.Modify))
@@ -102,12 +91,12 @@ class Repository @Inject constructor(
         } while (!successful)
     }
 
-    override suspend fun deleteCredential(id: String, cached: Boolean) {
+    override suspend fun deleteCredential(id: String) {
         val dao = databaseManager.storeDao()
         dao.deleteById(id) // note tag map is not updated because cbs...
 
         // Cache
-        if (syncClient.getSyncEnabled() && cached) {
+        if (syncClient.getSyncEnabled()) {
             val cacheDao = databaseManager.cacheDao()
             cacheDao.insert(Mutation(id, MutationType.Delete))
         }
