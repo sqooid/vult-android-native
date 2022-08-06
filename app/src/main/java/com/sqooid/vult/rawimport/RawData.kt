@@ -25,14 +25,20 @@ abstract class RawDataModule {
     @Binds
     abstract fun bindRawData(
         rawData: RawData
-    ): RawData
+    ): IRawData
+}
+
+interface IRawData {
+    suspend fun importFromUri(uri: Uri)
+
+    suspend fun exportToUri(uri: Uri)
 }
 
 class RawData @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: ICredentialRepository
-) {
-        suspend fun importFromUri(uri: Uri) {
+) : IRawData {
+        override suspend fun importFromUri(uri: Uri) {
             val resolver = context.contentResolver
             val builder = StringBuilder()
             resolver.openInputStream(uri)?.use { inputStream ->
@@ -66,7 +72,7 @@ class RawData @Inject constructor(
                     } else {
                         obj["fields"]!!.jsonArray.map { fieldElement ->
                             CredentialField(
-                                fieldElement.jsonObject["key"]!!.jsonPrimitive.content,
+                                fieldElement.jsonObject["name"]!!.jsonPrimitive.content,
                                 fieldElement.jsonObject["value"]!!.jsonPrimitive.content
                             )
                         }.toMutableList()
@@ -83,7 +89,7 @@ class RawData @Inject constructor(
 
         private val json = Json { prettyPrint = true }
 
-        suspend fun exportToUri(uri: Uri) {
+        override suspend fun exportToUri(uri: Uri) {
             val resolver = context.contentResolver
 
             val credentialString = json.encodeToString(

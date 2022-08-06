@@ -9,14 +9,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.sqooid.vult.rawimport.IRawData
 import com.sqooid.vult.rawimport.RawData
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class Settings @Inject constructor(
-    private val rawData: RawData
-) : PreferenceFragmentCompat() {
+@AndroidEntryPoint
+class Settings : PreferenceFragmentCompat() {
+    @Inject lateinit var rawData: IRawData
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
