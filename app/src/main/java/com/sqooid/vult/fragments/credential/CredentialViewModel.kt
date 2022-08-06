@@ -1,19 +1,16 @@
 package com.sqooid.vult.fragments.credential
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.repository.CredentialRepository
-import com.sqooid.vult.repository.Repository
+import com.sqooid.vult.repository.ICredentialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class CredentialViewModel @Inject constructor(private val repository: CredentialRepository) : ViewModel() {
+class CredentialViewModel @Inject constructor(private val repository: ICredentialRepository) : ViewModel() {
     lateinit var credential: Credential
     var passwordGeneratorSettings: PasswordGeneratorSettings? = null
 

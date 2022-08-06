@@ -4,13 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sqooid.vult.database.Credential
-import com.sqooid.vult.repository.CredentialRepository
+import com.sqooid.vult.repository.ICredentialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class VaultViewModel @Inject constructor(
-    val repository: CredentialRepository
+    val repository: ICredentialRepository
 ) : ViewModel() {
 
     val credentialList: LiveData<List<Credential>> =

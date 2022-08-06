@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.Mutation
 
-interface CredentialRepository {
+interface ICredentialRepository {
     fun getCredentialsLive(): LiveData<List<Credential>>
 
     fun getCredentialsStatic(): List<Credential>

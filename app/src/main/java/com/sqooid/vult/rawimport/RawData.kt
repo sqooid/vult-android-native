@@ -5,8 +5,7 @@ import android.net.Uri
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.repository.CredentialRepository
-import com.sqooid.vult.repository.Repository
+import com.sqooid.vult.repository.ICredentialRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -31,7 +30,7 @@ abstract class RawDataModule {
 
 class RawData @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val repository: CredentialRepository
+    private val repository: ICredentialRepository
 ) {
         suspend fun importFromUri(uri: Uri) {
             val resolver = context.contentResolver

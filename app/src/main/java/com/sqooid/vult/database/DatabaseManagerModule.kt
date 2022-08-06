@@ -10,5 +10,5 @@ import dagger.hilt.components.SingletonComponent
 abstract class DatabaseManagerModule {
     @Binds abstract fun bindDatabaseManager(
         databaseManager: DatabaseManager
-    ): DatabaseInterface
+    ): IDatabase
 }

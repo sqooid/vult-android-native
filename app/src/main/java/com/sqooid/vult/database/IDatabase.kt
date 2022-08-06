@@ -1,6 +1,6 @@
 package com.sqooid.vult.database
 
-interface DatabaseInterface {
+interface IDatabase {
     fun storeDao(): StoreDao
     fun cacheDao(): MutationDao
 }

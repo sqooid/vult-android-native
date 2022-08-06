@@ -5,16 +5,13 @@ import android.util.Base64
 import androidx.room.Room
 import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.KeyManager
-import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import net.sqlcipher.database.SupportFactory
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class DatabaseManager @Inject constructor(
     @ApplicationContext val context: Context
-): DatabaseInterface {
+): IDatabase {
     private var db: Database? = null
     private fun getDb(): Database {
         if (db == null) {

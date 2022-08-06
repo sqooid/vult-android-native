@@ -6,7 +6,7 @@ import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.auth.KeyManager
 import com.sqooid.vult.database.Credential
-import com.sqooid.vult.database.DatabaseInterface
+import com.sqooid.vult.database.IDatabase
 import com.sqooid.vult.database.MutationType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.client.*
@@ -19,7 +19,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import javax.inject.Inject
 
-interface SyncClientInterface {
+interface ISyncClient {
     fun getSyncEnabled(): Boolean
     fun setSyncEnabled(value: Boolean)
 
@@ -34,8 +34,8 @@ interface SyncClientInterface {
 
 class SyncClient @Inject constructor(
     @ApplicationContext val context: Context,
-    private val databaseManager: DatabaseInterface,
-) : SyncClientInterface {
+    private val databaseManager: IDatabase,
+) : ISyncClient {
 
     data class ClientParams(
         val host: String,

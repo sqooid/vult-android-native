@@ -13,5 +13,5 @@ abstract class SyncClientModule {
     @Binds
     abstract fun bindSyncClient(
         syncClient: SyncClient
-    ): SyncClientInterface
+    ): ISyncClient
 }
