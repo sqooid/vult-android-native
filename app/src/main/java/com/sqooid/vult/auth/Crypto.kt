@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.mindrot.jbcrypt.BCrypt
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -14,10 +15,41 @@ import java.nio.charset.Charset
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.PBEKeySpec
 
 class Crypto {
     companion object {
+        fun generateSeededKey(
+            seed: String,
+            fixedSalt: ByteArray? = null
+        ): Pair<ByteArray, ByteArray> {
+            val salt = fixedSalt ?: ByteArray(32)
+            if (fixedSalt == null) {
+                val random = SecureRandom()
+                random.nextBytes(salt)
+            }
+            val pbeSpec = PBEKeySpec(seed.toCharArray(), salt, 200000, 256)
+            val innerKey =
+                SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(pbeSpec)
+            return salt to innerKey.encoded
+        }
+
+        /**
+         * Create key used to encrypt/decrypt database
+         */
+        fun generateKey(): String {
+            val keyBytes = ByteArray(32)
+            SecureRandom().nextBytes(keyBytes)
+            return Base64.encode(keyBytes, Base64.NO_PADDING or Base64.NO_WRAP).toString(Charset.defaultCharset())
+        }
+
+        fun createHash(seed: String): String {
+            return BCrypt.hashpw(seed, BCrypt.gensalt())
+        }
+
+
         fun encrypt(key: SecretKey, message: String): String {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.ENCRYPT_MODE, key)

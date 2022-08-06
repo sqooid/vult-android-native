@@ -4,10 +4,11 @@ import android.content.Context
 import android.util.Log
 import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
-import com.sqooid.vult.auth.KeyManager
+import com.sqooid.vult.auth.IKeyManager
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.IDatabase
 import com.sqooid.vult.database.MutationType
+import com.sqooid.vult.preferences.IPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -35,6 +36,8 @@ interface ISyncClient {
 class SyncClient @Inject constructor(
     @ApplicationContext val context: Context,
     private val databaseManager: IDatabase,
+    private val keyManager: IKeyManager,
+    private val preferences: IPreferences
 ) : ISyncClient {
 
     data class ClientParams(
@@ -105,7 +108,7 @@ class SyncClient @Inject constructor(
         }?.body() ?: return RequestResult.Failed
         return when (response.status) {
             "success" -> {
-                setStateId(context, response.stateId!!)
+                preferences.stateId = response.stateId!!
                 RequestResult.Success
             }
             "existing" -> RequestResult.Conflict
@@ -116,7 +119,7 @@ class SyncClient @Inject constructor(
     private fun getEncryptedCredential(id: String): String? {
         val storeDao = databaseManager.storeDao()
         val credential = storeDao.getById(id) ?: return null
-        val key = KeyManager.getSyncKey() ?: return null
+        val key = keyManager.getSyncKey() ?: return null
         return Crypto.encryptObj(key, credential)
     }
 
@@ -141,7 +144,7 @@ class SyncClient @Inject constructor(
 
         val response: SyncResponse = client?.post("sync") {
             contentType(ContentType.Application.Json)
-            setBody(SyncRequest(getStateId(context), mutations))
+            setBody(SyncRequest(preferences.stateId, mutations))
         }?.body() ?: return RequestResult.Failed
 
         Log.d("app", response.toString())
@@ -182,7 +185,7 @@ class SyncClient @Inject constructor(
                     }
                 }
                 return if (response.stateId != null) {
-                    setStateId(context, response.stateId)
+                    preferences.stateId = response.stateId
                     storeDao.clear()
                     RequestResult.Success
                 } else {
@@ -195,7 +198,7 @@ class SyncClient @Inject constructor(
     }
 
     private fun decryptCredential(encrypted: String): Credential? {
-        val key = KeyManager.getSyncKey() ?: return null
+        val key = keyManager.getSyncKey() ?: return null
         val decrypted = Crypto.decryptObj<Credential>(key, encrypted)
         if (decrypted == null) {
             Log.d("app", "failed to decrypt $encrypted")
@@ -204,7 +207,7 @@ class SyncClient @Inject constructor(
     }
 
     private fun encryptCredential(credential: Credential): String? {
-        val key = KeyManager.getSyncKey() ?: return null
+        val key = keyManager.getSyncKey() ?: return null
         val encrypted = Crypto.encryptObj(key, credential)
         if (encrypted == null) {
             Log.d("app", "failed to encrypt $encrypted")
@@ -232,16 +235,5 @@ class SyncClient @Inject constructor(
             }
             else -> false
         }
-    }
-
-    private fun setStateId(context: Context, stateId: String) {
-        KeyManager.getSecurePrefs(context).edit().apply {
-            putString(Vals.STATE_ID_KEY, stateId)
-            apply()
-        }
-    }
-
-    private fun getStateId(context: Context): String {
-        return KeyManager.getSecurePrefs(context).getString(Vals.STATE_ID_KEY, "")!!
     }
 }

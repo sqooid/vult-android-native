@@ -16,7 +16,9 @@ import androidx.preference.PreferenceManager
 import com.sqooid.vult.R
 import com.sqooid.vult.auth.PasswordValidator
 import com.sqooid.vult.databinding.FragmentCreateAccountBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CreateAccount : Fragment() {
 
     private var _binding: FragmentCreateAccountBinding? = null
@@ -50,15 +52,14 @@ class CreateAccount : Fragment() {
         }
 
         binding.buttonCreateAccount.setOnClickListener {
-            viewModel.createAccount(requireContext())
+            viewModel.createAccount()
         }
 
-        viewModel.passwordTooShort.observe(viewLifecycleOwner) {
+        viewModel.passwordError.observe(viewLifecycleOwner) {
             binding.editTextMasterPasswordWrapper.error = when (it) {
                 null -> null
                 PasswordValidator.PasswordWeakness.None -> {
                     promptBiometrics()
-                    viewModel.createDataKey()
                     null
                 }
                 PasswordValidator.PasswordWeakness.TooShort -> "Password must be at least 8 characters long"

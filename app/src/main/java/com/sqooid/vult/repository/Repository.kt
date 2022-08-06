@@ -14,7 +14,6 @@ import net.sqlcipher.database.SQLiteConstraintException
 import javax.inject.Inject
 
 class Repository @Inject constructor(
-    @ApplicationContext val context: Context,
     private val databaseManager: IDatabase,
     private val syncClient: ISyncClient
 ) : ICredentialRepository {
