@@ -9,13 +9,15 @@ import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.IDatabase
 import com.sqooid.vult.database.Mutation
 import com.sqooid.vult.database.MutationType
+import com.sqooid.vult.preferences.IPreferences
+import com.sqooid.vult.preferences.Preferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import net.sqlcipher.database.SQLiteConstraintException
 import javax.inject.Inject
 
 class Repository @Inject constructor(
     private val databaseManager: IDatabase,
-    private val syncClient: ISyncClient
+    private val preferences: IPreferences
 ) : ICredentialRepository {
 
     private var credentialList: LiveData<List<Credential>>? = null
@@ -53,7 +55,7 @@ class Repository @Inject constructor(
         val result = dao.update(credential)
 
         // Cache - turn into add mutation if add already there
-        if (syncClient.getSyncEnabled()) {
+        if (preferences.syncEnabled) {
             val cacheDao = databaseManager.cacheDao()
             if (cacheDao.getById(credential.id) != null) {
                 cacheDao.update(Mutation(credential.id, MutationType.Add))
@@ -75,7 +77,7 @@ class Repository @Inject constructor(
                     tagMap[tag] = tagMap.getOrDefault(tag, 0) + 1
                 }
                 // Cache - convert earlier deletes into updates
-                if (syncClient.getSyncEnabled()) {
+                if (preferences.syncEnabled) {
                     val cacheDao = databaseManager.cacheDao()
                     if (cacheDao.getById(credential.id) != null) {
                         cacheDao.update(Mutation(credential.id, MutationType.Modify))
@@ -95,7 +97,7 @@ class Repository @Inject constructor(
         dao.deleteById(id) // note tag map is not updated because cbs...
 
         // Cache
-        if (syncClient.getSyncEnabled()) {
+        if (preferences.syncEnabled) {
             val cacheDao = databaseManager.cacheDao()
             cacheDao.insert(Mutation(id, MutationType.Delete))
         }

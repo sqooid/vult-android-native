@@ -1,15 +1,12 @@
 package com.sqooid.vult.client
 
-import android.content.Context
 import android.util.Log
-import com.sqooid.vult.Vals
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.auth.IKeyManager
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.IDatabase
 import com.sqooid.vult.database.MutationType
 import com.sqooid.vult.preferences.IPreferences
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -21,8 +18,7 @@ import io.ktor.serialization.kotlinx.json.*
 import javax.inject.Inject
 
 interface ISyncClient {
-    fun getSyncEnabled(): Boolean
-    fun setSyncEnabled(value: Boolean)
+    fun initializeClient(params: SyncClient.ClientParams)
 
     suspend fun importUser(): String?
 
@@ -30,11 +26,10 @@ interface ISyncClient {
 
     suspend fun doInitialUpload(): RequestResult
 
-    suspend fun doSync(context: Context): RequestResult
+    suspend fun doSync(): RequestResult
 }
 
 class SyncClient @Inject constructor(
-    @ApplicationContext val context: Context,
     private val databaseManager: IDatabase,
     private val keyManager: IKeyManager,
     private val preferences: IPreferences
@@ -47,19 +42,7 @@ class SyncClient @Inject constructor(
 
     private var client: HttpClient? = null
 
-    override fun getSyncEnabled(): Boolean {
-        return context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE)
-            .getBoolean(Vals.SYNC_ENABLED_KEY, false)
-    }
-
-    override fun setSyncEnabled(value: Boolean) {
-        context.getSharedPreferences(Vals.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit().apply {
-            putBoolean(Vals.SYNC_ENABLED_KEY, value)
-            apply()
-        }
-    }
-
-    fun initializeClient(params: ClientParams) {
+    override fun initializeClient(params: ClientParams) {
         client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 json()
@@ -123,7 +106,7 @@ class SyncClient @Inject constructor(
         return Crypto.encryptObj(key, credential)
     }
 
-    override suspend fun doSync(context: Context): RequestResult {
+    override suspend fun doSync(): RequestResult {
         val cacheDao = databaseManager.cacheDao()
         val storeDao = databaseManager.storeDao()
         val mutations = cacheDao.getAll().map {
