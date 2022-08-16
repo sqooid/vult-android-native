@@ -11,6 +11,7 @@ import com.sqooid.vult.database.CredentialField
 import com.sqooid.vult.database.IDatabase
 import com.sqooid.vult.preferences.IPreferences
 import com.sqooid.vult.repository.ICredentialRepository
+import com.sqooid.vult.repository.Repository
 import dagger.hilt.android.testing.CustomTestApplication
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -23,44 +24,29 @@ import org.junit.runner.RunWith
 import javax.inject.Inject
 
 
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class SyncTest {
-    @get:Rule
-    var hiltRule = HiltAndroidRule(this)
 
-    @Inject
-    lateinit var syncClient: ISyncClient
+    val database: IDatabase = FakeDatabase()
+    val keyManager: IKeyManager = FakeKeyManager()
+    val preferences: IPreferences = FakePreferences()
 
-    @Inject
-    lateinit var database: IDatabase
+    val syncClient: ISyncClient = SyncClient(database, keyManager, preferences)
+    val repository: ICredentialRepository = Repository(database, preferences)
 
-    @Inject
-    lateinit var keyManager: IKeyManager
-
-    @Inject
-    lateinit var repository: ICredentialRepository
-
-    @Inject
-    lateinit var preferences: IPreferences
 
     private val salt = "somesalt"
     private val seed = "someseed"
-    private val host = "192.168.0.26:8000"
+    private val host = "http://192.168.0.26:8000"
     private val key = "androidtest"
 
-    @BeforeClass
-    fun setUpClients() {
-        hiltRule.inject()
+    @Before
+    fun setup() {
         runBlocking {
             syncClient.initializeClient(SyncClient.ClientParams(host, key))
             syncClient.initializeUser(salt)
         }
         keyManager.createSyncKey(seed, salt.toByteArray())
-    }
-
-    @Before
-    fun clearDatabase() {
         database.cacheDao().clear()
         database.storeDao().clear()
         runBlocking {

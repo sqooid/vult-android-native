@@ -19,7 +19,7 @@ class FakePreferences : IPreferences {
 
 @Module
 @TestInstallIn(
-    components = [ActivityComponent::class],
+    components = [SingletonComponent::class],
     replaces = [RepositoryModule::class]
 )
 abstract class FakePreferencesModule {

@@ -47,7 +47,7 @@ class FakeKeyManager: IKeyManager {
 
 @Module
 @TestInstallIn(
-    components = [ActivityComponent::class],
+    components = [SingletonComponent::class],
     replaces = [KeyManagerModule::class]
 )
 abstract class FakeKeyManagerModule {

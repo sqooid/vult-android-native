@@ -23,7 +23,7 @@ class FakeDatabase : IDatabase {
 
 @Module
 @TestInstallIn(
-    components = [ActivityComponent::class],
+    components = [SingletonComponent::class],
     replaces = [DatabaseManagerModule::class]
 )
 abstract class FakeDatabaseModule {
