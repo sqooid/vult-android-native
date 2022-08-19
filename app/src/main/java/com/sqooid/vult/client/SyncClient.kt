@@ -27,6 +27,8 @@ interface ISyncClient {
     suspend fun doInitialUpload(): RequestResult
 
     suspend fun doSync(): RequestResult
+
+    suspend fun deleteUser(): RequestResult
 }
 
 class SyncClient @Inject constructor(
@@ -169,7 +171,7 @@ class SyncClient @Inject constructor(
                 }
                 return if (response.stateId != null) {
                     preferences.stateId = response.stateId
-                    storeDao.clear()
+                    cacheDao.clear()
                     RequestResult.Success
                 } else {
                     Log.d("app", "missing state id")
@@ -177,6 +179,15 @@ class SyncClient @Inject constructor(
                 }
             }
             else -> return RequestResult.Failed
+        }
+    }
+
+    override suspend fun deleteUser(): RequestResult {
+        val response = client?.post("test/reset") ?: return RequestResult.Failed
+        return if (response.status == HttpStatusCode.OK) {
+            RequestResult.Success
+        } else {
+            RequestResult.Failed
         }
     }
 

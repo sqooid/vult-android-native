@@ -14,7 +14,7 @@ class FakePreferences : IPreferences {
     override var syncSalt: String = ""
     override var loginHash: String = ""
     override var stateId: String = ""
-    override var syncEnabled: Boolean = true
+    override var syncEnabled: Boolean = false
 }
 
 @Module
