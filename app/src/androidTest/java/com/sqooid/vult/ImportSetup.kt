@@ -1,6 +1,8 @@
 package com.sqooid.vult
 
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.auth.IKeyManager
 import com.sqooid.vult.client.ISyncClient
 import com.sqooid.vult.client.RequestResult
@@ -15,10 +17,11 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
+import org.mindrot.jbcrypt.BCrypt
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(AndroidJUnit4::class)
-class SyncTest {
+class ImportSetup {
 
     var database: IDatabase = FakeDatabase()
     var keyManager: IKeyManager = FakeKeyManager()
@@ -28,8 +31,9 @@ class SyncTest {
     var repository: ICredentialRepository = Repository(database, preferences)
 
 
-    private val salt = "somesalt"
     private val seed = "someseed"
+    private val salt = "1wpK8FyB9kjMEV4HxsZMQcPPAS174siQ+v6sg6IE4VY"
+    private val hash = Crypto.createHash(seed)
     private val host = "http://192.168.0.26:8000"
     private val key = "androidtest"
 
@@ -44,6 +48,8 @@ class SyncTest {
         keyManager.createSyncKey(seed, salt.toByteArray())
         database.cacheDao().clear()
         database.storeDao().clear()
+        preferences.loginHash = hash
+        preferences.syncSalt = salt
     }
 
     fun resetServer() {
@@ -84,58 +90,5 @@ class SyncTest {
         }
         assert(result == RequestResult.Success)
         assert(preferences.stateId.isNotEmpty())
-        runBlocking {
-            result = syncClient.doInitialUpload()
-        }
-        assert(result == RequestResult.Conflict)
-        assert(database.cacheDao().getAll().isEmpty())
-    }
-
-    @Test
-    fun singleSyncUpload() {
-        resetServer()
-        runBlocking {
-            repository.addCredential(
-                Credential(
-                    "cred1",
-                    "cred1",
-                    mutableSetOf("tag1"),
-                    mutableListOf(CredentialField("field1", "value1")),
-                    "password1"
-                )
-            )
-            repository.addCredential(
-                Credential(
-                    "cred2",
-                    "cred2",
-                    mutableSetOf("tag2"),
-                    mutableListOf(CredentialField("field2", "value2")),
-                    "password2"
-                )
-            )
-        }
-        preferences.syncEnabled = true
-        var result: RequestResult
-        runBlocking {
-            syncClient.doInitialUpload()
-        }
-        val initialStateId = preferences.stateId
-        runBlocking {
-            repository.addCredential(
-                Credential(
-                    "cred3",
-                    "cred3",
-                    mutableSetOf("tag3"),
-                    mutableListOf(CredentialField("field3", "value3")),
-                    "password3"
-                )
-            )
-            assert(database.cacheDao().getAll()[0] == Mutation("cred3", MutationType.Add))
-            result = syncClient.doSync()
-        }
-        assert(preferences.stateId != initialStateId)
-        assert(result == RequestResult.Success)
-        assert(database.cacheDao().getAll().isEmpty())
-        assert(database.storeDao().getAllStatic().size == 3)
     }
 }

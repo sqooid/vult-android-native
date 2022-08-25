@@ -1,5 +1,6 @@
 package com.sqooid.vult.client
 
+import android.util.Base64
 import android.util.Log
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.auth.IKeyManager
@@ -15,14 +16,19 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.core.*
 import javax.inject.Inject
+import kotlin.text.toByteArray
 
 interface ISyncClient {
     fun initializeClient(params: SyncClient.ClientParams)
 
-    suspend fun importUser(): String?
+    /**
+     * Sets the sync master key and login hash
+     */
+    suspend fun importUser(password: String): RequestResult
 
-    suspend fun initializeUser(salt: String): RequestResult
+    suspend fun initializeUser(): RequestResult
 
     suspend fun doInitialUpload(): RequestResult
 
@@ -56,20 +62,35 @@ class SyncClient @Inject constructor(
         }
     }
 
-    override suspend fun importUser(): String? {
-        return try {
+    override suspend fun importUser(password: String): RequestResult {
+        try {
             val response: UserImportResponse? = client?.get("user/import")?.body()
-            response?.salt
+            if (response == null || response.status == "failed") {
+                return RequestResult.Failed
+            } else if (response.status == "uninitialized") {
+                return RequestResult.Conflict
+            }
+            if (response.salt == null || response.hash == null) {
+                return RequestResult.Failed
+            }
+            Log.d("app", response.toString())
+            keyManager.createSyncKey(password, Base64.decode(response.salt, Base64.NO_PADDING or Base64.NO_WRAP))
+            preferences.loginHash = response.hash
+            return RequestResult.Success
         } catch (e: Exception) {
-            null
+            Log.d("app", e.toString())
+            return RequestResult.Failed
         }
     }
 
-    override suspend fun initializeUser(salt: String): RequestResult {
+    override suspend fun initializeUser(): RequestResult {
         try {
+            val salt = preferences.syncSalt
+            val hash = preferences.loginHash
+            Log.d("app", "Initialize user: $salt $hash")
             val response: InitializeUserResponse = client?.post("user/init") {
                 contentType(ContentType.Application.Json)
-                setBody(InitializeUserRequest(salt))
+                setBody(InitializeUserRequest(salt, hash))
             }?.body() ?: return RequestResult.Failed
             return when (response.status) {
                 "success" -> RequestResult.Success

@@ -15,8 +15,7 @@ class DatabaseManager @Inject constructor(
     @ApplicationContext val context: Context,
     preferences: IPreferences
 ): IDatabase {
-    private val db: Database
-    init {
+    private val db: Database by lazy {
         val dataKeyString = preferences.databaseKey
         if (dataKeyString.isEmpty()) {
             throw Error("Missing database encryption key")
@@ -27,7 +26,7 @@ class DatabaseManager @Inject constructor(
                 Base64.NO_WRAP or Base64.NO_PADDING
             )
         )
-        db = Room.databaseBuilder(context, Database::class.java, "main-database")
+        Room.databaseBuilder(context, Database::class.java, "main-database")
             .openHelperFactory(supportFactory).build()
     }
 

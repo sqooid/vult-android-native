@@ -47,4 +47,10 @@
     <string name="length">Length</string>
     <string name="import_raw">pref_import</string>
     <string name="export_raw">pref_export</string>
+    <string name="vult_server_endpoint">Vult server endpoint</string>
+    <string name="user_key">User key</string>
+    <string name="server_url_description">The connection URL of your Vult server e.g. https://vultserver.com:8000</string>
+    <string name="user_key_description">A key associated with a user (alias) configured in the server</string>
+    <string name="import_password_description">The password used to encrypt/decrypt this store</string>
+    <string name="import_button">Import</string>
 </resources>

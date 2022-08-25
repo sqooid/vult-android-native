@@ -6,12 +6,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserImportResponse(
     val status: String,
-    val salt: String?
+    val salt: String?,
+    val hash: String?
 )
 
 @Serializable
 data class InitializeUserRequest(
-    val salt: String
+    val salt: String,
+    val hash: String
 )
 
 @Serializable
