@@ -11,6 +11,7 @@ import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.OvershootInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -18,17 +19,27 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.sqooid.vult.client.ISyncClient
+import com.sqooid.vult.client.RequestResult
 import com.sqooid.vult.client.SyncClient
 import com.sqooid.vult.databinding.FragmentVaultBinding
 import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
+import com.sqooid.vult.preferences.IPreferences
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class Vault : Fragment() {
+    @Inject
+    lateinit var preferences: IPreferences
+
+    @Inject
+    lateinit var syncClient: ISyncClient
+
     private var _binding: FragmentVaultBinding? = null
     private val binding get() = _binding!!
 
@@ -60,14 +71,6 @@ class Vault : Fragment() {
 
         binding.fabAdd.setOnClickListener {
             findNavController().navigate(VaultDirections.actionVaultToCredential(null))
-//            lifecycleScope.launch(Dispatchers.IO) {
-//                CredentialRepository.addCredential(requireContext(), Credential("same","Thing",
-//                    mutableSetOf("hello","work","secondary","shit"), arrayListOf(CredentialField("Email","chieck@super.das"),
-//                        CredentialField("Username","dasauto")
-//                    ), "nothing"
-//                )
-//                )
-//            }
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
@@ -79,11 +82,24 @@ class Vault : Fragment() {
         binding.recyclerView.adapter = adapter
 
 
+        if (preferences.syncEnabled) {
+            val server = preferences.syncServer
+            val key = preferences.syncKey
+            Log.d("app","initialize client: $server $key")
+            syncClient.initializeClient(server, key)
+        }
         binding.swipeDownSync.setOnRefreshListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-//                SyncClient.testStuff(requireContext())
+            if (!preferences.syncEnabled) {
+                binding.swipeDownSync.isRefreshing = false
+                toast("Sync not enabled")
+            } else {
+                Log.d("app","Syncing")
+                performSync()
             }
-            binding.swipeDownSync.isRefreshing = false
+        }
+        if (preferences.autoSyncEnabled) {
+            binding.swipeDownSync.isRefreshing = true
+            performSync()
         }
 
         binding.fabSettings.setOnClickListener {
@@ -135,6 +151,19 @@ class Vault : Fragment() {
         }
     }
 
+    private fun performSync() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = syncClient.doSync()
+            lifecycleScope.launch(Dispatchers.Main) {
+                when (result) {
+                    RequestResult.Success -> toast("Sync successful")
+                    else -> toast("Sync failed")
+                }
+                binding.swipeDownSync.isRefreshing = false
+            }
+        }
+    }
+
     private fun createSearchBarAnimator(reverse: Boolean): ObjectAnimator {
         return ObjectAnimator.ofFloat(
             binding.searchBarWrapperCard,
@@ -181,5 +210,9 @@ class Vault : Fragment() {
                 searchBarOnCooldown = false
             }
         }, 500)
+    }
+
+    private fun toast(message: String) {
+        Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
     }
 }

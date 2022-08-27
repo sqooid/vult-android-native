@@ -3,6 +3,7 @@ package com.sqooid.vult.preferences
 import android.content.Context
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
+import com.sqooid.vult.R
 import com.sqooid.vult.auth.IKeyManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -19,6 +20,8 @@ class Preferences @Inject constructor(
         const val LOGIN_HASH = "loginHash"
         const val STATE_ID = "stateId"
         const val SYNC_ENABLED = "syncEnabled"
+        const val SYNC_SERVER = "syncServer"
+        const val SYNC_KEY = "syncKey"
     }
 
     private val encryptedSharedPreferences = EncryptedSharedPreferences(
@@ -54,4 +57,28 @@ class Preferences @Inject constructor(
         get() = sharedPreferences.getBoolean(SYNC_ENABLED, false)
         set(value) = sharedPreferences.edit().putBoolean(SYNC_ENABLED, value).apply()
 
+    override var bioEnabled: Boolean
+        get() = defaultPreferences.getBoolean(context.getString(R.string.bio_key), false)
+        set(value) {
+            defaultPreferences.edit().putBoolean(context.getString(R.string.bio_key), value).apply()
+        }
+    override var autoSyncEnabled: Boolean
+        get() = defaultPreferences.getBoolean(context.getString(R.string.pref_auto_sync), true)
+        set(value) {
+            defaultPreferences.edit().putBoolean(context.getString(R.string.pref_auto_sync), value)
+                .apply()
+        }
+
+    override var syncKey: String
+        get() = encryptedSharedPreferences.getString(SYNC_KEY, "")!!
+        set(value) {
+            encryptedSharedPreferences.edit().putString(SYNC_KEY, value).commit()
+        }
+
+
+    override var syncServer: String
+        get() = encryptedSharedPreferences.getString(SYNC_SERVER, "")!!
+        set(value) {
+            encryptedSharedPreferences.edit().putString(SYNC_SERVER, value).commit()
+        }
 }

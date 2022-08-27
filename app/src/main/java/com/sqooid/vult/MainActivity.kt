@@ -2,8 +2,10 @@ package com.sqooid.vult
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
+import com.sqooid.vult.client.ISyncClient
 import com.sqooid.vult.preferences.IPreferences
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -11,6 +13,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject lateinit var preferences: IPreferences
+    @Inject lateinit var syncClient: ISyncClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -24,5 +28,6 @@ class MainActivity : AppCompatActivity() {
             graph.setStartDestination(R.id.login)
             navHostFragment.navController.graph = graph
         }
+
     }
 }

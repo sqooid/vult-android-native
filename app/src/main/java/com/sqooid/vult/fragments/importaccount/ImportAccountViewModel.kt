@@ -29,7 +29,7 @@ class ImportAccountViewModel @Inject constructor(
 
     suspend fun importAccount(): ImportError? {
         Log.d("app","$serverEndpoint $userKey $password")
-        syncClient.initializeClient(SyncClient.ClientParams(serverEndpoint, userKey))
+        syncClient.initializeClient(serverEndpoint, userKey)
         return when (syncClient.importUser(password)) {
             RequestResult.Failed -> {
                 undoAttempt()
@@ -40,7 +40,9 @@ class ImportAccountViewModel @Inject constructor(
                 ImportError.KEY
             }
             else -> {
-                if (BCrypt.checkpw(password, preferences.loginHash)) null else {
+                if (BCrypt.checkpw(password, preferences.loginHash)) {
+                    null
+                } else {
                     undoAttempt()
                     ImportError.PASSWORD
                 }
@@ -52,8 +54,10 @@ class ImportAccountViewModel @Inject constructor(
         preferences.loginHash = ""
     }
 
-    suspend fun importStore() {
+    fun createAccount() {
         preferences.databaseKey = Crypto.generateKey()
-        syncClient.doSync()
+        preferences.syncEnabled = true
+        preferences.syncServer = serverEndpoint
+        preferences.syncKey = userKey
     }
 }

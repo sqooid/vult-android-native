@@ -12,6 +12,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class SyncClientModule {
     @Binds
+    @Singleton
     abstract fun bindSyncClient(
         syncClient: SyncClient
     ): ISyncClient

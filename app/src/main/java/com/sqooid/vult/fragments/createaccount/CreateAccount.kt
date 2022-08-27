@@ -12,21 +12,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
 import com.sqooid.vult.R
 import com.sqooid.vult.auth.PasswordValidator
 import com.sqooid.vult.databinding.FragmentCreateAccountBinding
+import com.sqooid.vult.preferences.IPreferences
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CreateAccount : Fragment() {
+    @Inject
+    lateinit var preferences: IPreferences
 
     private var _binding: FragmentCreateAccountBinding? = null
     private val binding get() = _binding!!
-
-    companion object {
-        fun newInstance() = CreateAccount()
-    }
 
     private lateinit var viewModel: CreateAccountViewModel
 
@@ -75,8 +74,7 @@ class CreateAccount : Fragment() {
             builder.setTitle(R.string.biometrics_title)
                 .setMessage(R.string.enable_biometrics_dialog)
                 .setPositiveButton("Enable") { _, _ ->
-                    PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
-                        .putBoolean(this.getString(R.string.bio_key), true).apply()
+                    preferences.bioEnabled = true
                 }
                 .setNegativeButton("Later", null)
                 .setOnDismissListener {

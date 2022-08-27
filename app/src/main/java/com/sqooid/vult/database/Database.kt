@@ -44,8 +44,8 @@ class Converters {
     fun stringToMutType(str: String): MutationType {
         return when (str) {
             "0" -> MutationType.Add
-            "1" -> MutationType.Delete
-            else -> MutationType.Modify
+            "1" -> MutationType.Modify
+            else -> MutationType.Delete
         }
     }
 }

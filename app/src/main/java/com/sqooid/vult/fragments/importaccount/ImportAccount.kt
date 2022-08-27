@@ -11,20 +11,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
 import com.sqooid.vult.R
 import com.sqooid.vult.databinding.FragmentImportAccountBinding
-import com.sqooid.vult.fragments.createaccount.CreateAccountDirections
+import com.sqooid.vult.preferences.IPreferences
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ImportAccount : Fragment() {
 
-    companion object {
-        fun newInstance() = ImportAccount()
-    }
+    @Inject
+    lateinit var preferences: IPreferences
 
     private lateinit var viewModel: ImportAccountViewModel
     private var _binding: FragmentImportAccountBinding? = null
@@ -73,12 +72,8 @@ class ImportAccount : Fragment() {
                             binding.importPasswordLayout.error = "Incorrect password"
                         }
                         null -> {
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                viewModel.importStore()
-                                lifecycleScope.launch(Dispatchers.Main) {
-                                    promptBiometrics()
-                                }
-                            }
+                            viewModel.createAccount()
+                            promptBiometrics()
                         }
                     }
                 }
@@ -93,18 +88,20 @@ class ImportAccount : Fragment() {
             builder.setTitle(R.string.biometrics_title)
                 .setMessage(R.string.enable_biometrics_dialog)
                 .setPositiveButton("Enable") { _, _ ->
-                    PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
-                        .putBoolean(this.getString(R.string.bio_key), true).apply()
+                    preferences.bioEnabled = true
                 }
                 .setNegativeButton("Later", null)
                 .setOnDismissListener {
-                    this.findNavController()
-                        .navigate(CreateAccountDirections.actionCreateAccountToVault())
+                    onSuccess()
                 }
                 .show()
         } else {
-            this.findNavController()
-                .navigate(CreateAccountDirections.actionCreateAccountToVault())
+            onSuccess()
         }
+    }
+
+    private fun onSuccess() {
+        this.findNavController()
+            .navigate(ImportAccountDirections.actionImportAccountToVault())
     }
 }

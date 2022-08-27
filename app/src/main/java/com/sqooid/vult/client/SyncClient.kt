@@ -8,6 +8,7 @@ import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.IDatabase
 import com.sqooid.vult.database.MutationType
 import com.sqooid.vult.preferences.IPreferences
+import com.sqooid.vult.util.toPrettyString
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -16,12 +17,10 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.utils.io.core.*
 import javax.inject.Inject
-import kotlin.text.toByteArray
 
 interface ISyncClient {
-    fun initializeClient(params: SyncClient.ClientParams)
+    fun initializeClient(host: String, key: String)
 
     /**
      * Sets the sync master key and login hash
@@ -50,14 +49,14 @@ class SyncClient @Inject constructor(
 
     private var client: HttpClient? = null
 
-    override fun initializeClient(params: ClientParams) {
+    override fun initializeClient(host: String, key: String) {
         client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 json()
             }
             defaultRequest {
-                url(params.host)
-                header("Authentication", params.key)
+                url(host)
+                header("Authentication", key)
             }
         }
     }
@@ -74,8 +73,12 @@ class SyncClient @Inject constructor(
                 return RequestResult.Failed
             }
             Log.d("app", response.toString())
-            keyManager.createSyncKey(password, Base64.decode(response.salt, Base64.NO_PADDING or Base64.NO_WRAP))
+            keyManager.createSyncKey(
+                password,
+                Base64.decode(response.salt, Base64.NO_PADDING or Base64.NO_WRAP)
+            )
             preferences.loginHash = response.hash
+            preferences.syncSalt = response.salt
             return RequestResult.Success
         } catch (e: Exception) {
             Log.d("app", e.toString())
@@ -106,7 +109,10 @@ class SyncClient @Inject constructor(
         val storeDao = databaseManager.storeDao()
         val credentials: List<SyncCredential> =
             storeDao.getAllStatic().map {
-                SyncCredential(it.id, encryptCredential(it) ?: return RequestResult.Failed)
+                SyncCredential(it.id, encryptCredential(it) ?: run {
+                    Log.d("sync", "Failed to decrypt credential")
+                    return RequestResult.Failed
+                })
             }
         val response: InitialUploadResponse = client?.post("init/upload") {
             contentType(ContentType.Application.Json)
@@ -132,14 +138,18 @@ class SyncClient @Inject constructor(
     override suspend fun doSync(): RequestResult {
         val cacheDao = databaseManager.cacheDao()
         val storeDao = databaseManager.storeDao()
-        val mutations = cacheDao.getAll().map {
+        val cache = cacheDao.getAll()
+        Log.d("sync", cache.toPrettyString())
+        val mutations = cache.map {
             when (it.type) {
                 MutationType.Add -> {
+                    Log.d("sync", "Getting add mutation")
                     val credStr =
                         getEncryptedCredential(it.id) ?: return RequestResult.Failed
                     SyncMutation.Add(SyncCredential(it.id, credStr))
                 }
                 MutationType.Modify -> {
+                    Log.d("sync", "Getting modify mutation")
                     val credStr =
                         getEncryptedCredential(it.id) ?: return RequestResult.Failed
                     SyncMutation.Modify(SyncCredential(it.id, credStr))
@@ -148,6 +158,7 @@ class SyncClient @Inject constructor(
             }
         }
 
+        Log.d("sync", "Posting to sync endpoint")
         val response: SyncResponse = client?.post("sync") {
             contentType(ContentType.Application.Json)
             setBody(SyncRequest(preferences.stateId, mutations))

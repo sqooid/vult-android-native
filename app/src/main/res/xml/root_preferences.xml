@@ -40,6 +40,10 @@
 
     <PreferenceCategory app:title="Synchronization" app:iconSpaceReserved="false">
         <Preference app:title="Enable" app:key="@string/pref_sync" />
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:key="@string/pref_auto_sync"
+            app:title="Sync automatically" />
     </PreferenceCategory>
 
 </PreferenceScreen>
