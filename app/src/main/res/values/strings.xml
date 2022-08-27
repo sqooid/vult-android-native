@@ -53,4 +53,6 @@
     <string name="user_key_description">A key associated with a user (alias) configured in the server</string>
     <string name="import_password_description">The password used to encrypt/decrypt this store</string>
     <string name="import_button">Import</string>
+    <string name="pref_sync">pref_sync</string>
+    <string name="sync_dialog_description">Set up a <a href="https://github.com/sqooid/vult-server">Vult server</a> to backup and synchronize your passwords</string>
 </resources>
