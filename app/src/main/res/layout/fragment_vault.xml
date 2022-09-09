@@ -103,25 +103,28 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/search_bar_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/search"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
-                app:shapeAppearanceOverlay="@style/PillButtonStyle">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/search_bar"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_bar_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:text="@={viewmodel.searchText}"
-                    app:shapeAppearanceOverlay="@style/PillButtonStyle" />
+                    android:hint="@string/search"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:endIconMode="clear_text"
+                    app:shapeAppearanceOverlay="@style/PillButtonStyle">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/search_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:text="@={viewmodel.searchText}"
+                        app:shapeAppearanceOverlay="@style/PillButtonStyle" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
         </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

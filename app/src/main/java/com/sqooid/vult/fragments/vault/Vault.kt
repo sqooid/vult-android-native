@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnticipateOvershootInterpolator
-import android.view.animation.OvershootInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sqooid.vult.client.ISyncClient
 import com.sqooid.vult.client.RequestResult
-import com.sqooid.vult.client.SyncClient
 import com.sqooid.vult.databinding.FragmentVaultBinding
 import com.sqooid.vult.fragments.vault.recyclerview.MainAdapter
 import com.sqooid.vult.preferences.IPreferences
@@ -30,7 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class Vault : Fragment() {
@@ -51,7 +48,7 @@ class Vault : Fragment() {
 
     private lateinit var adapter: MainAdapter
 
-    private var showSearchBar: Boolean? = null
+    private var showSearchBar: Boolean = false
     private var searchBarOnCooldown: Boolean = false
 
     override fun onCreateView(
@@ -85,7 +82,7 @@ class Vault : Fragment() {
         if (preferences.syncEnabled) {
             val server = preferences.syncServer
             val key = preferences.syncKey
-            Log.d("app","initialize client: $server $key")
+            Log.d("app", "initialize client: $server $key")
             syncClient.initializeClient(server, key)
         }
         binding.swipeDownSync.setOnRefreshListener {
@@ -93,7 +90,7 @@ class Vault : Fragment() {
                 binding.swipeDownSync.isRefreshing = false
                 toast("Sync not enabled")
             } else {
-                Log.d("app","Syncing")
+                Log.d("app", "Syncing")
                 performSync()
             }
         }
@@ -107,7 +104,10 @@ class Vault : Fragment() {
         }
 
         binding.fabSearch.setOnClickListener {
-            showSearch(true)
+            if (showSearchBar)
+                hideSearch(true)
+            else
+                showSearch(true)
         }
         binding.searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -120,15 +120,10 @@ class Vault : Fragment() {
 
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (showSearchBar == null) {
-                    return
-                }
-                if ((dy != 0 || dx != 0) && binding.searchBar.isFocused && showSearchBar == true)
+                if ((dy != 0 || dx != 0) && binding.searchBar.isFocused && showSearchBar)
                     hideSearch(true)
-                if (dy > 0 && showSearchBar == true) {
+                if (dy > 0 && showSearchBar) {
                     hideSearch(false)
-                } else if (dy < 0 && showSearchBar == false) {
-//                    showSearch(false)
                 }
             }
         })
@@ -213,6 +208,6 @@ class Vault : Fragment() {
     }
 
     private fun toast(message: String) {
-        Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
