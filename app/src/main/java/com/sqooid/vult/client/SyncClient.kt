@@ -159,10 +159,16 @@ class SyncClient @Inject constructor(
         }
 
         Log.d("sync", "Posting to sync endpoint")
-        val response: SyncResponse = client?.post("sync") {
-            contentType(ContentType.Application.Json)
-            setBody(SyncRequest(preferences.stateId, mutations))
-        }?.body() ?: return RequestResult.Failed
+        val response: SyncResponse
+        try {
+            response = client?.post("sync") {
+                contentType(ContentType.Application.Json)
+                setBody(SyncRequest(preferences.stateId, mutations))
+            }?.body() ?: return RequestResult.Failed
+        } catch (e: Exception) {
+            Log.d("sync", "Failed sync with error\n$e")
+            return RequestResult.Failed
+        }
 
         Log.d("app", response.toString())
         when (response.status) {
