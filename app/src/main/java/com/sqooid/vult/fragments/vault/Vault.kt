@@ -128,7 +128,7 @@ class Vault : Fragment() {
                 if (dy > 0 && showSearchBar == true) {
                     hideSearch(false)
                 } else if (dy < 0 && showSearchBar == false) {
-                    showSearch(false)
+//                    showSearch(false)
                 }
             }
         })
