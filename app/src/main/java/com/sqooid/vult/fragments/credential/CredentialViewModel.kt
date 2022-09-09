@@ -75,7 +75,7 @@ class CredentialViewModel @Inject constructor(private val repository: ICredentia
 
     fun filterExistingTags(filter: String = "") {
         val filtered = existingTags.filter {
-            !credential.tags.contains(it) && it.contains(filter)
+            !credential.tags.contains(it) && it.contains(filter, true)
         }
         filteredExistingTags = ArrayList(filtered)
         newFilteredExistingTags.value = DataUpdateInfo(filtered, DataChangeType.None, -1)

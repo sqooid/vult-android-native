@@ -28,11 +28,11 @@ class VaultViewModel @Inject constructor(
         val tokens = filter.split(" ")
         filterCredentialList.value = credentialList.value?.filter {
             tokens.any { token ->
-                it.name.contains(token) || it.tags.any { tag ->
+                it.name.contains(token, true) || it.tags.any { tag ->
                     tag.contains(
-                        token
+                        token, true
                     )
-                } || it.fields.any { field -> field.value.contains(token) }
+                } || it.fields.any { field -> field.value.contains(token, true) }
             }
         }
     }
