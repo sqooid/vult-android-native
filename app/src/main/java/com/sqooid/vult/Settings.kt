@@ -50,6 +50,10 @@ class Settings : PreferenceFragmentCompat() {
                 lifecycleScope.launch(Dispatchers.IO) {
                     runCatching {
                         rawData.importFromUri(uri)
+                        launch(Dispatchers.Main) {
+                            Toast.makeText(requireContext(), "Import successful", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }.onFailure {
                         launch(Dispatchers.Main) {
                             Toast.makeText(requireContext(), "Failed to import", Toast.LENGTH_SHORT)

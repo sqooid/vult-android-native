@@ -97,7 +97,7 @@ class Vault : Fragment() {
                 performSync()
             }
         }
-        if (preferences.autoSyncEnabled) {
+        if (preferences.autoSyncEnabled && preferences.syncEnabled) {
             binding.swipeDownSync.isRefreshing = true
             performSync()
         }
