@@ -1,7 +1,6 @@
 package com.sqooid.vult.fragments.vault.recyclerview
 
 import android.animation.ValueAnimator
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,8 @@ import com.sqooid.vult.databinding.CredentialTileBinding
 class MainAdapter(
     var data: List<Credential>,
     private val recyclerView: RecyclerView,
-    private val onClickEdit: (Int) -> Unit
+    private val onClickEdit: (Int) -> Unit,
+    private val onClickCopy: (String, Boolean) -> Unit,
 ) : RecyclerView.Adapter<MainAdapter.ViewHolder>() {
     class ViewHolder(val binding: CredentialTileBinding) : RecyclerView.ViewHolder(binding.root) {
         var collapsedHeight = 0
@@ -34,7 +34,7 @@ class MainAdapter(
         binding.tagContainer.adapter = TagAdapter(listOf())
 
         binding.fieldContainer.layoutManager = LinearLayoutManager(parent.context)
-        binding.fieldContainer.adapter = FieldAdapter(listOf())
+        binding.fieldContainer.adapter = FieldAdapter(listOf(), onClickCopy)
         binding.fieldContainer.suppressLayout(true)
 
         return ViewHolder(binding)
@@ -47,6 +47,9 @@ class MainAdapter(
 
         // Password
         binding.password.text = credential.password
+        binding.password.setOnClickListener {
+            onClickCopy(credential.password, true)
+        }
 
         // Tags
         if (credential.tags.isNotEmpty()) {
@@ -62,6 +65,9 @@ class MainAdapter(
             binding.firstField.fieldLayout.visibility = View.VISIBLE
             binding.firstField.textFieldName.text = credential.fields[0].name
             binding.firstField.textValue.text = credential.fields[0].value
+            binding.firstField.textValue.setOnClickListener {
+                onClickCopy(credential.fields[0].value, false)
+            }
 
             if (credential.fields.size > 1) {
                 binding.fieldContainer.suppressLayout(false)

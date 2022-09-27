@@ -1,8 +1,13 @@
 package com.sqooid.vult.fragments.vault
 
 import android.animation.ObjectAnimator
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
+import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -71,11 +76,28 @@ class Vault : Fragment() {
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = MainAdapter(listOf(), binding.recyclerView) {
+        adapter = MainAdapter(listOf(), binding.recyclerView, {
             val cred = adapter.data[it]
             val clone = cred.copy(tags = cred.tags.toMutableSet(), fields = ArrayList(cred.fields))
             findNavController().navigate(VaultDirections.actionVaultToCredential(clone))
-        }
+        }, { text, secure ->
+            val clipboardManager = context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+            val clipData = ClipData.newPlainText("", text)
+
+            if (secure) {
+                clipData.apply {
+                    description.extras = PersistableBundle().apply {
+                        putBoolean("android.content.extra.IS_SENSITIVE", true)
+                    }
+                }
+            }
+
+            clipboardManager.setPrimaryClip(clipData)
+            // Only show a toast for Android 12 and lower.
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+
+        })
         binding.recyclerView.adapter = adapter
 
 
