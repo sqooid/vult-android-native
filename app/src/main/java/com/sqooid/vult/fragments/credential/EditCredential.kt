@@ -25,7 +25,6 @@ import com.sqooid.vult.R
 import com.sqooid.vult.auth.Crypto
 import com.sqooid.vult.database.Credential
 import com.sqooid.vult.database.CredentialField
-import com.sqooid.vult.repository.Repository
 import com.sqooid.vult.databinding.FragmentCredentialBinding
 import com.sqooid.vult.databinding.NewFieldDialogBinding
 import com.sqooid.vult.fragments.vault.recyclerview.TagAdapter
@@ -166,6 +165,10 @@ class EditCredential : Fragment() {
             }
         }
 
+        viewModel.passwordInput.observe(viewLifecycleOwner) {
+            viewModel.credential.password = it
+        }
+
         // Generator settings
         // Defaults
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
@@ -201,6 +204,7 @@ class EditCredential : Fragment() {
 
         // Done button
         binding.fabDone.setOnClickListener {
+            Log.d("app","cred: ${viewModel.credential}")
             if (viewModel.credential.name.isEmpty()) {
                 binding.inputCredName.error = "Name cannot be empty"
                 return@setOnClickListener
