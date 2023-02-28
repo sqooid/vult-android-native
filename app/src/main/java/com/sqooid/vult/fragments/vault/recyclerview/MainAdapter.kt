@@ -1,6 +1,7 @@
 package com.sqooid.vult.fragments.vault.recyclerview
 
 import android.animation.ValueAnimator
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,7 @@ class MainAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val binding = holder.binding
         val credential = data[position]
+        Log.d("app",credential.toString())
         binding.textViewName.text = credential.name
 
         // Password
@@ -74,6 +76,8 @@ class MainAdapter(
                 (binding.fieldContainer.adapter as FieldAdapter).fields =
                     credential.fields.slice(1 until credential.fields.size)
                 binding.fieldContainer.suppressLayout(true)
+            } else {
+                (binding.fieldContainer.adapter as FieldAdapter).fields = emptyList()
             }
             binding.fieldContainer.adapter!!.notifyDataSetChanged()
 
