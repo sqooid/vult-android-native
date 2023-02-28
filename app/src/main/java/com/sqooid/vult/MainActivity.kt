@@ -37,11 +37,13 @@ class MainActivity : AppCompatActivity() {
         Log.d("app", "Created activity")
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus) {
+    override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
+        if (!isTopResumedActivity) {
             autoLockJob = lifecycleScope.launch(Dispatchers.Default) {
-                delay(Duration.parse("10s"))
-                initApp()
+                delay(Duration.parse("3s"))
+                lifecycleScope.launch(Dispatchers.Main) {
+                    initApp()
+                }
             }
         } else {
             autoLockJob?.cancel()
