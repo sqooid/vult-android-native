@@ -11,6 +11,7 @@ import com.sqooid.vult.preferences.IPreferences
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
+import kotlin.system.exitProcess
 import kotlin.time.Duration
 
 @AndroidEntryPoint
@@ -37,17 +38,24 @@ class MainActivity : AppCompatActivity() {
         Log.d("app", "Created activity")
     }
 
-    override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
-        if (!isTopResumedActivity) {
-            autoLockJob = lifecycleScope.launch(Dispatchers.Default) {
-                delay(Duration.parse("3s"))
-                lifecycleScope.launch(Dispatchers.Main) {
-                    initApp()
-                }
+    override fun onPause() {
+        super.onPause()
+        Log.d("app","paused")
+        autoLockJob = lifecycleScope.launch(Dispatchers.Default) {
+            Log.d("app","waiting for timeout")
+            delay(Duration.parse("20s"))
+            lifecycleScope.launch(Dispatchers.Main) {
+                Log.d("app", "locked app automatically")
+                finishAffinity()
+                exitProcess(0)
             }
-        } else {
-            autoLockJob?.cancel()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("app","resumed")
+        autoLockJob?.cancel()
     }
 
     private fun initApp() {

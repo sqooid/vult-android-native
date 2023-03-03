@@ -44,7 +44,6 @@ class MainAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val binding = holder.binding
         val credential = data[position]
-        Log.d("app",credential.toString())
         binding.textViewName.text = credential.name
 
         // Password
